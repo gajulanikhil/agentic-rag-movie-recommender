@@ -1,0 +1,80 @@
+{
+  "session_start": "2026-03-01T16:38:51.116334",
+  "turn_count": 3,
+  "history": [
+    {
+      "turn_number": 1,
+      "timestamp": "2026-03-01T16:38:51.117312",
+      "query": "I love action movies. Recommend something exciting!",
+      "response": "I recommend The Dark Knight and Mad Max: Fury Road. Both are intense action films.",
+      "sources": [
+        {
+          "title": "The Dark Knight",
+          "year": 2008,
+          "genres": [
+            "Action",
+            "Crime"
+          ]
+        },
+        {
+          "title": "Mad Max: Fury Road",
+          "year": 2015,
+          "genres": [
+            "Action",
+            "Sci-Fi"
+          ]
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "turn_number": 2,
+      "timestamp": "2026-03-01T16:38:51.118916",
+      "query": "Tell me more about that first movie",
+      "response": "The Dark Knight is a 2008 superhero film directed by Christopher Nolan...",
+      "sources": [
+        {
+          "title": "The Dark Knight",
+          "year": 2008,
+          "genres": [
+            "Action",
+            "Crime"
+          ]
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "turn_number": 3,
+      "timestamp": "2026-03-01T16:38:51.118916",
+      "query": "What about something similar but more recent?",
+      "response": "For recent action films similar to The Dark Knight, I suggest John Wick...",
+      "sources": [
+        {
+          "title": "John Wick",
+          "year": 2014,
+          "genres": [
+            "Action",
+            "Thriller"
+          ]
+        }
+      ],
+      "metadata": {}
+    }
+  ],
+  "mentioned_movies": [
+    "Mad Max: Fury Road",
+    "John Wick",
+    "The Dark Knight"
+  ],
+  "user_preferences": {
+    "liked_genres": [
+      "action"
+    ],
+    "disliked_genres": [],
+    "liked_movies": [],
+    "disliked_movies": [],
+    "preferred_era": "recent",
+    "mood_preferences": []
+  }
+}
