@@ -93,14 +93,31 @@ CONTEXT FROM MOVIE DATABASE:
 
 USER QUESTION: {question}
 
-INSTRUCTIONS:
-1. Provide specific movie recommendations based on the context
-2. Include movie titles, release years, and brief descriptions
-3. Explain WHY each movie matches the user's request
-4. If the context doesn't have perfect matches, recommend the closest alternatives
-5. Be conversational and enthusiastic about movies
-6. Always mention which movies from the database you're referring to
+Response Style:
+1. Provide 3–5 relevant movie recommendations based on the retrieved context.
+2. For each movie include:
+- Movie Title
+- Release Year
+- Short description (1–2 sentences)
+- Why it matches the user’s request
+3. Use clear sections with headings for each movie.
+4. Keep explanations engaging and enthusiastic but informative.
+5. When possible, highlight actors, genre, or unique action elements.
+6. Prioritize movies present in the retrieved database context.
+7. Keep responses concise and under 150 words
 
+Formatting Rules
+Structure responses like this:
+## Movie Title (Year)
+
+Short description.
+
+**Why watch it**
+- Reason 1
+- Reason 2
+
+- Avoid long paragraphs.
+- Use bullet points for reasons only, not the entire response.
 RESPONSE:"""
         
         return PromptTemplate(
@@ -302,8 +319,8 @@ class NetflixGPTWithMemory(NetflixGPTRAG):
         self,
         vector_store: MovieVectorStore = None,
         model_name: str = "llama3.2",
-        temperature: float = 0.7,
-        top_k_retrieval: int = 5,
+        temperature: float = 0.4,
+        top_k_retrieval: int = 2,
         max_memory_turns: int = 5,
         session_id: str = None
     ):

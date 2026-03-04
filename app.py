@@ -3,7 +3,7 @@
 Netflix GPT - Premium Streamlit Interface
 Production-ready UI with Netflix styling
 """
-
+from src.tmdb_integration import get_multiple_posters, get_movie_poster
 import streamlit as st
 from streamlit_lottie import st_lottie
 import requests
@@ -64,7 +64,14 @@ def inject_custom_css():
         margin-bottom: 0;
         animation: glow 2s ease-in-out infinite alternate;
     }
-    
+    # After hero title
+    lottie_url = "https://assets5.lottiefiles.com/packages/lf20_khzniaya.json"  # Movie animation
+    lottie_json = load_lottie_url(lottie_url)
+
+    if lottie_json:
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            st_lottie(lottie_json, height=200, key="hero_animation")
     @keyframes glow {
         from {
             text-shadow: 0 0 10px rgba(229, 9, 20, 0.4),
@@ -409,6 +416,37 @@ def inject_custom_css():
     .fade-in {
         animation: fadeIn 0.5s ease-out;
     }
+    # Add this inside the <style> tag in inject_custom_css()
+
+    /* Poster hover effect */
+    .movie-card img {
+        transition: all 0.3s ease;
+    }
+    
+    .movie-card:hover img {
+        transform: scale(1.05);
+        box-shadow: 0 8px 16px rgba(229, 9, 20, 0.4);
+    }
+    
+    /* Loading skeleton for images */
+    .poster-skeleton {
+        width: 100px;
+        height: 150px;
+        background: linear-gradient(
+            90deg,
+            rgba(31, 31, 31, 0.8) 25%,
+            rgba(45, 45, 45, 0.9) 50%,
+            rgba(31, 31, 31, 0.8) 75%
+        );
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+        border-radius: 8px;
+    }
+    
+    @keyframes loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }            
     </style>
     """, unsafe_allow_html=True)
 
@@ -475,19 +513,38 @@ def initialize_rag_system():
             return False
     
     return True
-
+def safe_get_posters(sources):
+    """Safely get posters with fallback"""
+    try:
+        return get_multiple_posters(sources)
+    except Exception as e:
+        print(f"TMDB Error: {e}")
+        # Return sources without posters
+        for source in sources:
+            source['poster_url'] = None
+            source['backdrop_url'] = None
+        return sources
+    
 def format_sources(sources):
-    """Format source movies as cards"""
+    """Format source movies as cards with posters"""
     if not sources:
         return ""
     
+    # Get posters for all sources
+    try:
+        sources_with_posters = get_multiple_posters(sources[:5])
+    except:
+        sources_with_posters = sources[:5]
+    
     html = '<div style="margin-top: 1rem;">'
     
-    for source in sources[:5]:  # Show top 5
+    for source in sources_with_posters:
         title = source.get('title', 'Unknown')
         year = source.get('year', 'N/A')
         genres = source.get('genres', [])
         score = source.get('similarity_score', 0)
+        poster_url = source.get('poster_url')
+        rating = source.get('vote_average')
         
         # Format genres
         if isinstance(genres, list):
@@ -495,13 +552,34 @@ def format_sources(sources):
         else:
             genre_tags = f'<span class="movie-genre">{genres}</span>'
         
-        html += f'''
-        <div class="movie-card">
-            <div class="movie-title">🎬 {title}</div>
-            <div class="movie-info">📅 {year} • Relevance: {score:.0%}</div>
-            <div style="margin-top: 0.5rem;">{genre_tags}</div>
-        </div>
-        '''
+        # Build card with poster
+        if poster_url:
+            html += f'''
+            <div class="movie-card" style="display: flex; gap: 1rem;">
+                <div style="flex-shrink: 0;">
+                    <img src="{poster_url}" 
+                         style="width: 100px; height: 150px; object-fit: cover; border-radius: 8px; 
+                                box-shadow: 0 4px 8px rgba(0,0,0,0.3);"
+                         alt="{title} poster">
+                </div>
+                <div style="flex-grow: 1;">
+                    <div class="movie-title">🎬 {title}</div>
+                    <div class="movie-info">📅 {year} • Relevance: {score:.0%}</div>
+                    {f'<div class="movie-info">⭐ {rating}/10</div>' if rating else ''}
+                    <div style="margin-top: 0.5rem;">{genre_tags}</div>
+                </div>
+            </div>
+            '''
+        else:
+            # Fallback without poster
+            html += f'''
+            <div class="movie-card">
+                <div class="movie-title">🎬 {title}</div>
+                <div class="movie-info">📅 {year} • Relevance: {score:.0%}</div>
+                {f'<div class="movie-info">⭐ {rating}/10</div>' if rating else ''}
+                <div style="margin-top: 0.5rem;">{genre_tags}</div>
+            </div>
+            '''
     
     html += '</div>'
     return html
@@ -687,13 +765,42 @@ def main():
                         <div class="message-time">{message.get('timestamp', '')}</div>
                     </div>
                     ''', unsafe_allow_html=True)
+                # else:
+                #     st.markdown(f'''
+                #     <div class="assistant-message">
+                #         {message['content']}
+                #         <div class="message-time">{message.get('timestamp', '')}</div>
+                #     </div>
+                #     ''', unsafe_allow_html=True)
                 else:
+                    # Assistant message with enhanced display
                     st.markdown(f'''
                     <div class="assistant-message">
                         {message['content']}
                         <div class="message-time">{message.get('timestamp', '')}</div>
                     </div>
                     ''', unsafe_allow_html=True)
+                    
+                    # Show sources with posters
+                    if message.get('sources'):
+                        with st.expander("📚 View Movie Details", expanded=False):
+                            sources_html = format_sources(message['sources'])
+                            st.markdown(sources_html, unsafe_allow_html=True)
+                            
+                            # Optional: Show as grid
+                            cols = st.columns(min(3, len(message['sources'])))
+                            sources_with_posters = get_multiple_posters(message['sources'][:3])
+                            
+                            for idx, (col, source) in enumerate(zip(cols, sources_with_posters)):
+                                with col:
+                                    if source.get('poster_url'):
+                                        st.image(
+                                            source['poster_url'],
+                                            caption=f"{source['title']} ({source.get('year', 'N/A')})",
+                                            use_container_width=True
+                                        )
+                                        if source.get('vote_average'):
+                                            st.markdown(f"⭐ **{source['vote_average']}/10**")
                     
                     # Show sources if available
                     if message.get('sources'):

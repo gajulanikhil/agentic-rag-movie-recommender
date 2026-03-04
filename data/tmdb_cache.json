@@ -1,0 +1,90 @@
+{
+  "Test Movie_2024": {
+    "poster_url": "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
+    "backdrop_url": "https://image.tmdb.org/t/p/w780/dqK9Hag1054tghRQSqLSfrkvQnA.jpg",
+    "tmdb_id": 155,
+    "title": "The Dark Knight",
+    "year": 2008,
+    "overview": "Batman raises the stakes in his war on crime. With the help of Lt. Jim Gordon and District Attorney Harvey Dent, Batman sets out to dismantle the remaining criminal organizations that plague the streets. The partnership proves to be effective, but they soon find themselves prey to a reign of chaos unleashed by a rising criminal mastermind known to the terrified citizens of Gotham as the Joker.",
+    "vote_average": 8.527,
+    "popularity": 26.7853
+  },
+  "The Shawshank Redemption_1994": {
+    "poster_url": "https://image.tmdb.org/t/p/w500/9cqNxx0GxF0bflZmeSMuL5tnGzr.jpg",
+    "backdrop_url": "https://image.tmdb.org/t/p/w780/zfbjgQE1uSd9wiPTX4VzsLi0rGG.jpg",
+    "tmdb_id": 278,
+    "title": "The Shawshank Redemption",
+    "year": 1994,
+    "overview": "Imprisoned in the 1940s for the double murder of his wife and her lover, upstanding banker Andy Dufresne begins a new life at the Shawshank prison, where he puts his accounting skills to work for an amoral warden. During his long stretch in prison, Dufresne comes to be admired by the other inmates -- including an older prisoner named Red -- for his integrity and unquenchable sense of hope.",
+    "vote_average": 8.7,
+    "popularity": 38.2504
+  },
+  "Schindler's List_1993": {
+    "poster_url": "https://image.tmdb.org/t/p/w500/sF1U4EUQS8YHUYjNl3pMGNIQyr0.jpg",
+    "backdrop_url": "https://image.tmdb.org/t/p/w780/zb6fM1CX41D9rF9hdgclu0peUmy.jpg",
+    "tmdb_id": 424,
+    "title": "Schindler's List",
+    "year": 1993,
+    "overview": "The true story of how businessman Oskar Schindler saved over a thousand Jewish lives from the Nazis while they worked as slaves in his factory during World War II.",
+    "vote_average": 8.566,
+    "popularity": 17.6609
+  },
+  "Documentaries Collection_N/A": {
+    "poster_url": null,
+    "backdrop_url": null,
+    "tmdb_id": null,
+    "title": "Documentaries Collection",
+    "year": "N/A"
+  },
+  "Once Upon a Time in America_1984": {
+    "poster_url": "https://image.tmdb.org/t/p/w500/i0enkzsL5dPeneWnjl1fCWm6L7k.jpg",
+    "backdrop_url": "https://image.tmdb.org/t/p/w780/xlDUjb0Q5Dv6jPQRF5VE4IMjIy.jpg",
+    "tmdb_id": 311,
+    "title": "Once Upon a Time in America",
+    "year": 1984,
+    "overview": "A former Prohibition-era Jewish gangster returns to the Lower East Side of Manhattan over thirty years later, where he once again must confront the ghosts and regrets of his old life.",
+    "vote_average": 8.385,
+    "popularity": 10.6116
+  },
+  "Dramas Collection_N/A": {
+    "poster_url": null,
+    "backdrop_url": null,
+    "tmdb_id": null,
+    "title": "Dramas Collection",
+    "year": "N/A"
+  },
+  "Pulp Fiction_1994": {
+    "poster_url": "https://image.tmdb.org/t/p/w500/vQWk5YBFWF4bZaofAbv0tShwBvQ.jpg",
+    "backdrop_url": "https://image.tmdb.org/t/p/w780/96hiUXEuYsu4tcnvlaY8tEMFM0m.jpg",
+    "tmdb_id": 680,
+    "title": "Pulp Fiction",
+    "year": 1994,
+    "overview": "A burger-loving hit man, his philosophical partner, a drug-addled gangster's moll and a washed-up boxer converge in this sprawling, comedic crime caper. Their adventures unfurl in three stories that ingeniously trip back and forth in time.",
+    "vote_average": 8.486,
+    "popularity": 22.4965
+  },
+  "International Movies Collection_N/A": {
+    "poster_url": null,
+    "backdrop_url": null,
+    "tmdb_id": null,
+    "title": "International Movies Collection",
+    "year": "N/A"
+  },
+  "The Green Mile_1999": {
+    "poster_url": "https://image.tmdb.org/t/p/w500/8VG8fDNiy50H4FedGwdSVUPoaJe.jpg",
+    "backdrop_url": "https://image.tmdb.org/t/p/w780/b6HWTOxn1xevvyHU2K9ICvaRU6g.jpg",
+    "tmdb_id": 497,
+    "title": "The Green Mile",
+    "year": 1999,
+    "overview": "A supernatural tale set on death row in a Southern prison, where gentle giant John Coffey possesses the mysterious power to heal people's ailments. When the cell block's head guard, Paul Edgecomb, recognizes Coffey's miraculous gift, he tries desperately to help stave off the condemned man's execution.",
+    "vote_average": 8.504,
+    "popularity": 20.7448
+  },
+  "Action & Adventure Collection_N/A": {
+    "poster_url": null,
+    "backdrop_url": null,
+    "tmdb_id": null,
+    "title": "Action & Adventure Collection",
+    "year": "N/A"
+  }
+}
