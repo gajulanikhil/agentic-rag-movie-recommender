@@ -797,7 +797,6 @@ def main():
                                         st.image(
                                             source['poster_url'],
                                             caption=f"{source['title']} ({source.get('year', 'N/A')})",
-                                            use_container_width=True
                                         )
                                         if source.get('vote_average'):
                                             st.markdown(f"⭐ **{source['vote_average']}/10**")
@@ -890,8 +889,8 @@ def main():
     st.markdown('<div class="netflix-divider" style="margin-top: 3rem;"></div>', unsafe_allow_html=True)
     st.markdown('''
     <div style="text-align: center; color: #808080; padding: 2rem 0;">
-        <p>Built with Streamlit • Powered by Ollama & ChromaDB</p>
-        <p style="font-size: 0.8rem;">Netflix GPT © 2024 • Educational Project</p>
+        <p>Powered by Group 14 - The Peter Pan Posse</p>
+        <p style="font-size: 0.8rem;">Nikhil Gajula • Radhey Mutha • Muneeb Ahmed</p>
     </div>
     ''', unsafe_allow_html=True)
 

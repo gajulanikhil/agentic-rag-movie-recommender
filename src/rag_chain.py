@@ -93,7 +93,7 @@ CONTEXT FROM MOVIE DATABASE:
 
 USER QUESTION: {question}
 
-Response Style:
+Instructions:
 1. Provide 3–5 relevant movie recommendations based on the retrieved context.
 2. For each movie include:
 - Movie Title
@@ -104,9 +104,9 @@ Response Style:
 4. Keep explanations engaging and enthusiastic but informative.
 5. When possible, highlight actors, genre, or unique action elements.
 6. Prioritize movies present in the retrieved database context.
-7. Keep responses concise and under 150 words
+7. Keep responses concise and under 150 words overall.
 
-Formatting Rules
+Formatting Rules:
 Structure responses like this:
 ## Movie Title (Year)
 
@@ -118,6 +118,7 @@ Short description.
 
 - Avoid long paragraphs.
 - Use bullet points for reasons only, not the entire response.
+
 RESPONSE:"""
         
         return PromptTemplate(
