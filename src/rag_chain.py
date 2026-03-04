@@ -93,31 +93,18 @@ CONTEXT FROM MOVIE DATABASE:
 
 USER QUESTION: {question}
 
-Instructions:
-1. Provide 3–5 relevant movie recommendations based on the retrieved context.
-2. For each movie include:
-- Movie Title
-- Release Year
-- Short description (1–2 sentences)
-- Why it matches the user’s request
-3. Use clear sections with headings for each movie.
-4. Keep explanations engaging and enthusiastic but informative.
-5. When possible, highlight actors, genre, or unique action elements.
-6. Prioritize movies present in the retrieved database context.
-7. Keep responses concise and under 150 words overall.
+INSTRUCTIONS:
+1. Recommend 2-3 movies maximum
+2. Use this EXACT format for each movie:
+   • Movie Title (Year) - One sentence why it matches
+3. Keep total response under 100 words
+4. No long descriptions or explanations
+5. Be direct and concise
 
-Formatting Rules:
-Structure responses like this:
-## Movie Title (Year)
-
-Short description.
-
-**Why watch it**
-- Reason 1
-- Reason 2
-
-- Avoid long paragraphs.
-- Use bullet points for reasons only, not the entire response.
+Example response:
+- The Dark Knight (2008) - Gripping action thriller with psychological depth
+- Mad Max: Fury Road (2015) - Non-stop adrenaline with stunning visuals
+CRITICAL: Your entire response must be under 100 words. Count your words.
 
 RESPONSE:"""
         
