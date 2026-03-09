@@ -1,6 +1,6 @@
 #app.py
 """
-Netflix GPT - Premium Streamlit Interface
+Movie Recommender - Premium Streamlit Interface
 Production-ready UI with Netflix styling
 """
 from src.tmdb_integration import get_multiple_posters, get_movie_poster
@@ -20,7 +20,7 @@ from error_handler import ErrorHandler
 
 # Page config MUST be first Streamlit command
 st.set_page_config(
-    page_title="Netflix GPT",
+    page_title="Movie Recommender",
     page_icon="🎬",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -286,12 +286,13 @@ def initialize_rag_system():
     """Initialize the RAG system"""
     if not st.session_state.system_initialized:
         try:
-            with st.spinner("🎬 Initializing Netflix GPT..."):
+            with st.spinner("🎬 Initializing Movie Recommender..."):
                 session_id = datetime.now().strftime("%Y%m%d_%H%M%S")
                 st.session_state.rag_system = NetflixGPTRobust(
                     model_name="llama3.2",
                     temperature=0.7,
-                    max_memory_turns=5,
+                    max_memory_turns=3,
+                    top_k_retrieval=3,
                     session_id=f"streamlit_{session_id}",
                     enable_validation=True
                 )
@@ -442,14 +443,7 @@ def render_sidebar():
             label_visibility="collapsed"
         )
         
-        # Reset button
-        st.markdown('<div style="margin-top: 2rem;"></div>', unsafe_allow_html=True)
-        if st.button("🔄 Reset Filters", use_container_width=True):
-            st.session_state.genre_filter = []
-            st.session_state.year_filter = (1990, 2024)
-            st.session_state.rating_filter = 6.0
-            st.session_state.type_filter = "All"
-            st.rerun()
+        # Note: Reset Filters button removed per user request
         
         # System Status
         st.markdown('<div class="netflix-divider" style="margin-top: 2rem;"></div>', unsafe_allow_html=True)
@@ -523,7 +517,7 @@ def main():
     inject_custom_css(st.session_state.theme)
     
     # Hero Section
-    st.markdown('<h1 class="hero-title">WhatsApp Movie GPT</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 class="hero-title">Movie Recommender</h1>', unsafe_allow_html=True)
     st.markdown('<p class="hero-tagline">Your AI-powered movie discovery assistant 🎬</p>', unsafe_allow_html=True)
     st.markdown('<div class="netflix-divider"></div>', unsafe_allow_html=True)
     
@@ -539,9 +533,7 @@ def main():
     example_queries = [
         "Suggest psychological thrillers like Shutter Island",
         "Best romantic movies from 2015 to 2020",
-        "Feel good comedy movies for weekend",
-        "Top rated crime TV shows",
-        "Movies similar to Inception"
+        "Feel good comedy movies for weekend"
     ]
     
     # Create clickable example buttons
@@ -611,7 +603,7 @@ def main():
         else:
             st.markdown('''
             <div class="info-box">
-                <p>👋 Welcome to Netflix GPT! I'm here to help you discover amazing movies and shows.</p>
+                <p>👋 Welcome to Movie Recommender! I'm here to help you discover amazing movies and shows.</p>
                 <p>💡 Ask me anything about movies - recommendations, comparisons, or specific genres!</p>
             </div>
             ''', unsafe_allow_html=True)
@@ -619,20 +611,21 @@ def main():
     # Input section
     st.markdown('<div class="netflix-divider"></div>', unsafe_allow_html=True)
     
-    col1, col2 = st.columns([5, 1])
-    
-    with col1:
-        user_input = st.text_input(
-            "Ask me anything about movies...",
-            value=st.session_state.current_input,
-            placeholder="E.g., Recommend action movies with great plots...",
-            key="user_query_input",
-            label_visibility="collapsed"
-        )
-    
-    with col2:
-        send_button = st.button("🚀 Send", use_container_width=True)
-    
+    with st.form("chat_form", clear_on_submit=False):
+        col1, col2 = st.columns([5, 1])
+        
+        with col1:
+            user_input = st.text_input(
+                "Ask me anything about movies...",
+                value=st.session_state.current_input,
+                placeholder="E.g., Recommend action movies with great plots...",
+                key="user_query_input",
+                label_visibility="collapsed"
+            )
+        
+        with col2:
+            send_button = st.form_submit_button("🚀 Send", use_container_width=True)
+            
     # Process query
     if send_button and user_input:
         # Reset current input

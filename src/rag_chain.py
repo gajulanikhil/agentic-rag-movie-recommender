@@ -1,5 +1,5 @@
 """
-RAG Chain for Netflix GPT
+RAG Chain for Movie Recommender
 Combines retrieval + LLM generation for movie recommendations
 """
 
@@ -84,7 +84,7 @@ class NetflixGPTRAG:
     def _create_prompt_template(self) -> PromptTemplate:
         """Create the prompt template for the LLM"""
         
-        template = """You are Netflix GPT, an expert movie recommendation assistant. You help users discover movies based on their preferences.
+        template = """You are Movie Recommender, an expert movie recommendation assistant. You help users discover movies based on their preferences.
 
 You have access to a movie database with detailed information. Use the context below to provide accurate, helpful recommendations.
 
@@ -376,7 +376,7 @@ class NetflixGPTWithMemory(NetflixGPTRAG):
     def _create_memory_aware_prompt_template(self) -> PromptTemplate:
         """Create prompt template that includes conversation history"""
         
-        template = """You are Netflix GPT, an expert movie recommendation assistant with memory of the conversation.
+        template = """You are Movie Recommender, an expert movie recommendation assistant with memory of the conversation.
 
 CONVERSATION HISTORY:
 {conversation_history}
@@ -391,9 +391,9 @@ Start with enthusiasm and a greeting.
 1. Use conversation history to understand the request.
 2. Do not recommend movies already mentioned unless the user asks again.
 3. Respect user preferences from earlier messages.
-4. Return the number of movies requested. If not specified, return **5 movies**.
+4. Return the number of movies requested. If not specified, return **3 movies**.
 5. If fewer movies exist in the database, return only those.
-6. Keep the response **under 150 words**.
+6. Keep the response **under 100 words**.
 Output Format (STRICT)
 
 - Return **only a vertical list**.
@@ -1046,7 +1046,7 @@ def test_rag_system():
     """Test the RAG system with sample queries"""
     
     print("\n" + "="*70)
-    print("TESTING NETFLIX GPT RAG SYSTEM")
+    print("TESTING Movie Recommender RAG SYSTEM")
     print("="*70 + "\n")
     
     # Initialize RAG system

@@ -336,5 +336,112 @@
     "overview": "Over the course of a decade, editors of the San Francisco Chronicle entice themselves in the murders of the Zodiac Killer. However, as time runs its course, interest in the case dwindles in the eyes of the professionals. The Killer stops interacting with the public. However, believing he has the answers, an amateur cartoonist from the initial sightings races against time to prevent what he believes is another murder.",
     "vote_average": 7.527,
     "popularity": 15.3645
+  },
+  "The Lovebirds_2020": {
+    "poster_url": "https://image.tmdb.org/t/p/w500/5jdLnvALCpK1NkeQU1z4YvOe2dZ.jpg",
+    "backdrop_url": "https://image.tmdb.org/t/p/w780/1EGFjibWzsN2GNNeOSQBYhQ9pK5.jpg",
+    "tmdb_id": 576156,
+    "title": "The Lovebirds",
+    "year": "2020",
+    "overview": "A couple experiences a defining moment in their relationship when they are unintentionally embroiled in a murder mystery. As their journey to clear their names takes them from one extreme \u2013 and hilarious - circumstance to the next, they must figure out how they, and their relationship, can survive the night.",
+    "vote_average": 6.109,
+    "popularity": 7.3572
+  },
+  "Comedies Collection_N/A": {
+    "poster_url": "https://image.tmdb.org/t/p/w500/t0xM8bboZd69DnpmGLr70KgbTEr.jpg",
+    "backdrop_url": null,
+    "tmdb_id": 542754,
+    "title": "The Harold Lloyd Comedy Collection Vols. 1-3",
+    "year": "N/A",
+    "overview": "The Harold Lloyd Comedy Collection boxed set is the definitive account of one of the silent cinema's greatest comedians--and for a time, its most popular star. The seven discs included in this three-volume set have virtually all of Lloyd's 1920s features, most of his talking pictures, and a healthy collection of shorts. Because Lloyd--a canny businessman--retained control over much of his output, the films have remained under his (and his estate's) control through the decades, and the quality of the key titles is generally excellent.",
+    "vote_average": 6.8,
+    "popularity": 0.0143
+  },
+  "Hello! I'm thrilled to dive deeper into The Lovebirds_2020": {
+    "poster_url": null,
+    "backdrop_url": null,
+    "tmdb_id": null,
+    "title": "Hello! I'm thrilled to dive deeper into The Lovebirds",
+    "year": "2020"
+  },
+  "Interstellar_2014": {
+    "poster_url": "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
+    "backdrop_url": "https://image.tmdb.org/t/p/w780/2ssWTSVklAEc98frZUQhgtGHx7s.jpg",
+    "tmdb_id": 157336,
+    "title": "Interstellar",
+    "year": "2014",
+    "overview": "The adventures of a group of explorers who make use of a newly discovered wormhole to surpass the limitations on human space travel and conquer the vast distances involved in an interstellar voyage.",
+    "vote_average": 8.468,
+    "popularity": 48.1974
+  },
+  "The Matrix_1999": {
+    "poster_url": "https://image.tmdb.org/t/p/w500/p96dm7sCMn4VYAStA6siNz30G1r.jpg",
+    "backdrop_url": "https://image.tmdb.org/t/p/w780/tlm8UkiQsitc8rSuIAscQDCnP8d.jpg",
+    "tmdb_id": 603,
+    "title": "The Matrix",
+    "year": "1999",
+    "overview": "Set in the 22nd century, The Matrix tells the story of a computer hacker who joins a group of underground insurgents fighting the vast and powerful computers who now rule the earth.",
+    "vote_average": 8.239,
+    "popularity": 28.2254
+  },
+  "The Bourne Identity_2002": {
+    "poster_url": "https://image.tmdb.org/t/p/w500/aP8swke3gmowbkfZ6lmNidu0y9p.jpg",
+    "backdrop_url": "https://image.tmdb.org/t/p/w780/g1MFwTP8jQK5RM7Lz0ROZYkEZqI.jpg",
+    "tmdb_id": 2501,
+    "title": "The Bourne Identity",
+    "year": "2002",
+    "overview": "Wounded to the brink of death and suffering from amnesia, Jason Bourne is rescued at sea by a fisherman. With nothing to go on but a Swiss bank account number, he starts to reconstruct his life, but finds that many people he encounters want him dead. However, Bourne realizes that he has the combat and mental skills of a world-class spy\u2014but who does he work for?",
+    "vote_average": 7.47,
+    "popularity": 13.5159
+  },
+  "Crouching Tiger, Hidden Dragon_2000": {
+    "poster_url": "https://image.tmdb.org/t/p/w500/iNDVBFNz4XyYzM9Lwip6atSTFqf.jpg",
+    "backdrop_url": "https://image.tmdb.org/t/p/w780/nSm9cij9VRrGDoZoS16CPnX0FqK.jpg",
+    "tmdb_id": 146,
+    "title": "Crouching Tiger, Hidden Dragon",
+    "year": "2000",
+    "overview": "Two warriors in pursuit of a stolen sword and a notorious fugitive are led to an impetuous, physically-skilled, teenage nobleman's daughter, who is at a crossroads in her life.",
+    "vote_average": 7.432,
+    "popularity": 6.827
+  },
+  "La La Land_2016": {
+    "poster_url": "https://image.tmdb.org/t/p/w500/uDO8zWDhfWwoFdKS4fzkUJt0Rf0.jpg",
+    "backdrop_url": "https://image.tmdb.org/t/p/w780/nlPCdZlHtRNcF6C9hzUH4ebmV1w.jpg",
+    "tmdb_id": 313369,
+    "title": "La La Land",
+    "year": "2016",
+    "overview": "Mia, an aspiring actress, serves lattes to movie stars in between auditions and Sebastian, a jazz musician, scrapes by playing cocktail party gigs in dingy bars, but as success mounts they are faced with decisions that begin to fray the fragile fabric of their love affair, and the dreams they worked so hard to maintain in each other threaten to rip them apart.",
+    "vote_average": 7.899,
+    "popularity": 12.5476
+  },
+  "Always Be My Maybe_2019": {
+    "poster_url": "https://image.tmdb.org/t/p/w500/3BO6pPa7qDcpPYct061Luh9fvst.jpg",
+    "backdrop_url": "https://image.tmdb.org/t/p/w780/aC5LAGfHzVH8f7tkCwkxzXsqAZz.jpg",
+    "tmdb_id": 513576,
+    "title": "Always Be My Maybe",
+    "year": "2019",
+    "overview": "Reunited after 15 years, famous chef Sasha and hometown musician Marcus feel the old sparks of attraction, but struggle to adapt to each other's worlds.",
+    "vote_average": 6.646,
+    "popularity": 1.6589
+  },
+  "Gone Girl_2014": {
+    "poster_url": "https://image.tmdb.org/t/p/w500/ts996lKsxvjkO2yiYG0ht4qAicO.jpg",
+    "backdrop_url": "https://image.tmdb.org/t/p/w780/iWak7wT0j6ycCc8lKr4NBz9c7n5.jpg",
+    "tmdb_id": 210577,
+    "title": "Gone Girl",
+    "year": "2014",
+    "overview": "With his wife's disappearance having become the focus of an intense media circus, a man sees the spotlight turned on him when it's suspected that he may not be innocent.",
+    "vote_average": 7.889,
+    "popularity": 18.0954
+  },
+  "Misery_1990": {
+    "poster_url": "https://image.tmdb.org/t/p/w500/klPO5oh1LOxiPpdDXZo1ADgpKcw.jpg",
+    "backdrop_url": "https://image.tmdb.org/t/p/w780/cgo3OmF84touDrrLkQ1DQ3MRFyO.jpg",
+    "tmdb_id": 1700,
+    "title": "Misery",
+    "year": "1990",
+    "overview": "After an accident, acclaimed novelist Paul Sheldon is rescued by a nurse who claims to be his biggest fan.  Her obsession takes a dark turn when she holds him captive in her remote Colorado home and forces him to write back to life the popular literary character he killed off.",
+    "vote_average": 7.746,
+    "popularity": 11.9502
   }
 }
