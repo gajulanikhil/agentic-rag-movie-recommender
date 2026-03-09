@@ -11,6 +11,9 @@ import json
 from datetime import datetime
 from pathlib import Path
 import sys
+import io
+import speech_recognition as sr
+from streamlit_mic_recorder import mic_recorder
 
 # Add src to path
 sys.path.append('src')
@@ -65,10 +68,10 @@ def inject_custom_css(theme="dark"):
 
     st.markdown(f"""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+    @import url('https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,300,400&display=swap');
     
     * {{
-        font-family: 'Roboto', sans-serif;
+        font-family: 'Satoshi', sans-serif;
     }}
     
     .stApp {{
@@ -162,6 +165,7 @@ def inject_custom_css(theme="dark"):
         max-width: 75%;
         box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         position: relative;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }}
     .user-message * {{ color: {user_text} !important; }}
     
@@ -174,6 +178,7 @@ def inject_custom_css(theme="dark"):
         max-width: 75%;
         box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         position: relative;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }}
     .assistant-message * {{ color: {bot_text} !important; }}
     
@@ -227,11 +232,11 @@ def inject_custom_css(theme="dark"):
         margin: 0.5rem 0;
         border-left: 4px solid {hero_color};
     }}
-    .movie-title {{ color: {text_main}; font-size: 1.2rem; font-weight: bold; margin-bottom: 0.5rem; }}
-    .movie-info {{ color: {text_muted} !important; font-size: 0.9rem; margin: 0.3rem 0; }}
+    .movie-title {{ color: #000000; font-size: 1.2rem; font-weight: bold; margin-bottom: 0.5rem; }}
+    .movie-info {{ color: #000000; font-size: 0.9rem; margin: 0.3rem 0; }}
     .movie-genre {{
         background: rgba(37, 211, 102, 0.2);
-        color: {hero_color} !important;
+        color: #000000;
         padding: 0.2rem 0.6rem;
         border-radius: 12px;
         font-size: 0.8rem;
@@ -281,6 +286,22 @@ def initialize_session_state():
     if 'theme' not in st.session_state:
         st.session_state.theme = "dark"
 
+
+def transcribe_audio(audio_bytes):
+    """Transcribe audio bytes to text using SpeechRecognition and Google Web Speech API"""
+    recognizer = sr.Recognizer()
+    try:
+        # Convert bytes to an audio data source
+        with sr.AudioFile(io.BytesIO(audio_bytes)) as source:
+            audio_data = recognizer.record(source)
+            text = recognizer.recognize_google(audio_data)
+            return text
+    except sr.UnknownValueError:
+        st.error("Audio was unclear, could not understand.")
+        return ""
+    except Exception as e:
+        st.error(f"Error transcribing audio: {str(e)}")
+        return ""
 
 def initialize_rag_system():
     """Initialize the RAG system"""
@@ -399,9 +420,8 @@ def render_sidebar():
     """Render the sidebar with filters"""
     with st.sidebar:
         st.markdown('<div class="sidebar-title">⚙️ Settings</div>', unsafe_allow_html=True)
-        # Theme toggle
-        is_dark = st.toggle("🌙 Dark Mode", value=(st.session_state.theme == 'dark'))
-        st.session_state.theme = 'dark' if is_dark else 'light'
+        # Theme is permanently set to dark mode
+        st.session_state.theme = 'dark'
         
         st.markdown('<div class="netflix-divider"></div>', unsafe_allow_html=True)
         st.markdown('<div class="sidebar-title">🎯 Advanced Filters</div>', unsafe_allow_html=True)
@@ -517,7 +537,7 @@ def main():
     inject_custom_css(st.session_state.theme)
     
     # Hero Section
-    st.markdown('<h1 class="hero-title">Movie Recommender</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 class="hero-title">AI Movie Recommender</h1>', unsafe_allow_html=True)
     st.markdown('<p class="hero-tagline">Your AI-powered movie discovery assistant 🎬</p>', unsafe_allow_html=True)
     st.markdown('<div class="netflix-divider"></div>', unsafe_allow_html=True)
     
@@ -526,26 +546,7 @@ def main():
         if not initialize_rag_system():
             st.stop()
     
-    # Example queries section
-    st.markdown('<div class="fade-in">', unsafe_allow_html=True)
-    st.markdown("### 💡 Try these examples:")
-    
-    example_queries = [
-        "Suggest psychological thrillers like Shutter Island",
-        "Best romantic movies from 2015 to 2020",
-        "Feel good comedy movies for weekend"
-    ]
-    
-    # Create clickable example buttons
-    cols = st.columns(len(example_queries))
-    for idx, (col, query) in enumerate(zip(cols, example_queries)):
-        with col:
-            if st.button(f"💬 {query[:30]}...", key=f"example_{idx}", use_container_width=True):
-                set_example_query(query)
-                st.rerun()
-    
-    st.markdown('</div>', unsafe_allow_html=True)
-    st.markdown('<div class="netflix-divider"></div>', unsafe_allow_html=True)
+    # Example queries section removed
     
     # Chat container
     st.markdown("### 💬 Conversation")
@@ -611,6 +612,24 @@ def main():
     # Input section
     st.markdown('<div class="netflix-divider"></div>', unsafe_allow_html=True)
     
+    # Place mic recorder outside the form so its React state doesn't wipe on submit
+    col_mic1, col_mic2 = st.columns([5, 1])
+    with col_mic2:
+        audio_info = mic_recorder(
+            start_prompt="🎙️ Voice",
+            stop_prompt="⏹️ Stop",
+            key='mic_recorder',
+            format="wav",
+            just_once=True,
+            use_container_width=True
+        )
+        
+    if audio_info and 'bytes' in audio_info:
+        with st.spinner("Transcribing..."):
+            text = transcribe_audio(audio_info['bytes'])
+            if text:
+                st.session_state.current_input = text
+                
     with st.form("chat_form", clear_on_submit=False):
         col1, col2 = st.columns([5, 1])
         

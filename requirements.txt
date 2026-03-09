@@ -26,3 +26,7 @@ requests==2.31.0
 python-dotenv==1.0.0
 
 ipykernel
+
+# Voice Input Recognition
+streamlit-mic-recorder==0.0.8 
+SpeechRecognition==3.14.0
