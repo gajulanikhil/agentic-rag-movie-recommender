@@ -572,14 +572,15 @@ def format_sources(sources):
             '''
         else:
             # Fallback without poster
-            html += f'''
-            <div class="movie-card">
-                <div class="movie-title">🎬 {title}</div>
-                <div class="movie-info">📅 {year} • Relevance: {score:.0%}</div>
-                {f'<div class="movie-info">⭐ {rating}/10</div>' if rating else ''}
-                <div style="margin-top: 0.5rem;">{genre_tags}</div>
-            </div>
-            '''
+            html = ''
+            # html += f'''
+            # <div class="movie-card">
+            #     <div class="movie-title">🎬 {title}</div>
+            #     <div class="movie-info">📅 {year} • Relevance: {score:.0%}</div>
+            #     {f'<div class="movie-info">⭐ {rating}/10</div>' if rating else ''}
+            #     <div style="margin-top: 0.5rem;">{genre_tags}</div>
+            # </div>
+            # '''
     
     html += '</div>'
     return html
@@ -802,11 +803,11 @@ def main():
                                             st.markdown(f"⭐ **{source['vote_average']}/10**")
                     
                     # Show sources if available
-                    if message.get('sources'):
-                        with st.expander("📚 View Sources"):
-                            st.markdown(format_sources(message['sources']), unsafe_allow_html=True)
+                    #if message.get('sources'):
+                        #with st.expander("📚 View Sources"):
+                            #st.markdown(format_sources(message['sources']), unsafe_allow_html=True)
             
-            st.markdown('</div>', unsafe_allow_html=True)
+            #st.markdown('</div>', unsafe_allow_html=True)
         else:
             st.markdown('''
             <div class="info-box">

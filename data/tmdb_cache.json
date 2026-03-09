@@ -86,5 +86,25 @@
     "tmdb_id": null,
     "title": "Action & Adventure Collection",
     "year": "N/A"
+  },
+  "Whiplash_2014": {
+    "poster_url": "https://image.tmdb.org/t/p/w500/7fn624j5lj3xTme2SgiLCeuedmO.jpg",
+    "backdrop_url": "https://image.tmdb.org/t/p/w780/wbQa0EnWUyRzQ5d1pHLNRlmsCUP.jpg",
+    "tmdb_id": 244786,
+    "title": "Whiplash",
+    "year": 2014,
+    "overview": "Under the direction of a ruthless instructor, a talented young drummer begins to pursue perfection at any cost, even his humanity.",
+    "vote_average": 8.374,
+    "popularity": 15.9159
+  },
+  "Forrest Gump_1994": {
+    "poster_url": "https://image.tmdb.org/t/p/w500/saHP97rTPS5eLmrLQEcANmKrsFl.jpg",
+    "backdrop_url": "https://image.tmdb.org/t/p/w780/67HggiWaP9ZLv5sPYmyRV37yAJM.jpg",
+    "tmdb_id": 13,
+    "title": "Forrest Gump",
+    "year": 1994,
+    "overview": "A man with a low IQ has accomplished great things in his life and been present during significant historic events\u2014in each case, far exceeding what anyone imagined he could do. But despite all he has achieved, his one true love eludes him.",
+    "vote_average": 8.462,
+    "popularity": 27.8809
   }
 }
