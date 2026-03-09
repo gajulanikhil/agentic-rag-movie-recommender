@@ -30,430 +30,228 @@ st.set_page_config(
 # CUSTOM CSS - NETFLIX PREMIUM THEME
 # ============================================================================
 
-def inject_custom_css():
-    """Inject custom CSS for Netflix-style UI"""
-    st.markdown("""
-    <style>
-    /* Import Netflix font */
-    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@300;400;700&display=swap');
-    
-    /* Global Styles */
-    * {
-        font-family: 'Roboto', sans-serif;
-    }
-    
-    /* Main background */
-    .stApp {
-        background: linear-gradient(to bottom, #0B0B0B 0%, #141414 100%);
-    }
-    
-    /* Hide Streamlit branding */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-    
-    /* Hero Section */
-    .hero-title {
-        font-family: 'Bebas Neue', cursive;
-        font-size: 5rem;
-        color: #E50914;
-        text-align: center;
-        letter-spacing: 0.1em;
-        text-shadow: 0 0 20px rgba(229, 9, 20, 0.5),
-                     0 0 40px rgba(229, 9, 20, 0.3);
-        margin-bottom: 0;
-        animation: glow 2s ease-in-out infinite alternate;
-    }
-    # After hero title
-    lottie_url = "https://assets5.lottiefiles.com/packages/lf20_khzniaya.json"  # Movie animation
-    lottie_json = load_lottie_url(lottie_url)
+def inject_custom_css(theme="dark"):
+    """Inject custom CSS for WhatsApp-style UI"""
+    if theme == "dark":
+        bg_gradient = "linear-gradient(to bottom, #0B141A 0%, #111B21 100%)"
+        sidebar_bg = "#111b21"
+        hero_color = "#25D366"
+        text_main = "#E9EDEF"
+        text_muted = "#8696A0"
+        card_bg = "#202c33"
+        btn_bg = "linear-gradient(135deg, #00A884 0%, #008F6F 100%)"
+        btn_hover = "linear-gradient(135deg, #00BFA5 0%, #009688 100%)"
+        chat_bg = "#0b141a"
+        user_msg = "#005c4b"
+        user_text = "#e9edef"
+        bot_msg = "#202c33"
+        bot_text = "#e9edef"
+        border_color = "rgba(255,255,255,0.1)"
+    else:
+        bg_gradient = "linear-gradient(to bottom, #efeae2 0%, #f0f2f5 100%)"
+        sidebar_bg = "#ffffff"
+        hero_color = "#128C7E"
+        text_main = "#111B21"
+        text_muted = "#667781"
+        card_bg = "#ffffff"
+        btn_bg = "linear-gradient(135deg, #25D366 0%, #128C7E 100%)"
+        btn_hover = "linear-gradient(135deg, #128C7E 0%, #075E54 100%)"
+        chat_bg = "#efeae2"
+        user_msg = "#d9fdd3"
+        user_text = "#111b21"
+        bot_msg = "#ffffff"
+        bot_text = "#111b21"
+        border_color = "rgba(0,0,0,0.1)"
 
-    if lottie_json:
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col2:
-            st_lottie(lottie_json, height=200, key="hero_animation")
-    @keyframes glow {
-        from {
-            text-shadow: 0 0 10px rgba(229, 9, 20, 0.4),
-                         0 0 20px rgba(229, 9, 20, 0.3);
-        }
-        to {
-            text-shadow: 0 0 20px rgba(229, 9, 20, 0.6),
-                         0 0 40px rgba(229, 9, 20, 0.4),
-                         0 0 60px rgba(229, 9, 20, 0.2);
-        }
-    }
+    st.markdown(f"""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
     
-    .hero-tagline {
-        font-size: 1.3rem;
-        color: #B3B3B3;
+    * {{
+        font-family: 'Roboto', sans-serif;
+    }}
+    
+    .stApp {{
+        background: {bg_gradient};
+    }}
+    
+    #MainMenu, footer, header {{visibility: hidden;}}
+    
+    .hero-title {{
+        font-size: 3.5rem;
+        color: {hero_color};
+        text-align: center;
+        font-weight: bold;
+        margin-bottom: 0;
+        letter-spacing: 0.05em;
+    }}
+    
+    .hero-tagline {{
+        font-size: 1.2rem;
+        color: {text_muted};
         text-align: center;
         margin-top: 0.5rem;
         margin-bottom: 2rem;
-        text-shadow: 0 0 10px rgba(179, 179, 179, 0.3);
-    }
+    }}
     
-    /* Divider */
-    .netflix-divider {
+    .netflix-divider {{
         height: 2px;
-        background: linear-gradient(to right, 
-            transparent 0%, 
-            #E50914 50%, 
-            transparent 100%);
+        background: {border_color};
         margin: 2rem 0;
-        box-shadow: 0 0 10px rgba(229, 9, 20, 0.5);
-    }
+    }}
     
-    /* Sidebar Styling */
-    section[data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #1F1F1F 0%, #0B0B0B 100%);
-        border-right: 1px solid #E50914;
-        box-shadow: 5px 0 15px rgba(229, 9, 20, 0.2);
-    }
+    section[data-testid="stSidebar"] {{
+        background: {sidebar_bg} !important;
+        border-right: 1px solid {border_color};
+    }}
     
-    section[data-testid="stSidebar"] > div {
-        padding: 2rem 1rem;
-    }
-    
-    /* Sidebar Title */
-    .sidebar-title {
-        color: #E50914;
+    .sidebar-title {{
+        color: {hero_color};
         font-size: 1.5rem;
         font-weight: bold;
         text-align: center;
         margin-bottom: 1.5rem;
-        text-shadow: 0 0 10px rgba(229, 9, 20, 0.5);
-    }
+    }}
     
-    /* Filter Section Headers */
-    .filter-header {
-        color: #FFFFFF;
+    .filter-header {{
+        color: {text_main} !important;
         font-size: 1rem;
         font-weight: 600;
         margin-top: 1rem;
-        margin-bottom: 0.5rem;
+        border-left: 3px solid {hero_color};
         padding-left: 0.5rem;
-        border-left: 3px solid #E50914;
-    }
+    }}
     
-    /* Streamlit widgets in sidebar */
-    section[data-testid="stSidebar"] .stSelectbox label,
-    section[data-testid="stSidebar"] .stMultiSelect label,
-    section[data-testid="stSidebar"] .stSlider label {
-        color: #B3B3B3 !important;
-        font-size: 0.9rem;
-    }
+    section[data-testid="stSidebar"] label, .streamlit-expanderHeader, p, div {{
+        color: {text_main} !important;
+    }}
     
-    /* Chat Container */
-    .chat-container {
-        background: rgba(31, 31, 31, 0.6);
+    .chat-container {{
+        background: {chat_bg};
         border-radius: 15px;
         padding: 1.5rem;
         margin: 1rem 0;
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(229, 9, 20, 0.1);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        border: 1px solid {border_color};
         max-height: 500px;
         overflow-y: auto;
-    }
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }}
     
-    /* Custom Scrollbar */
-    .chat-container::-webkit-scrollbar {
+    .chat-container::-webkit-scrollbar {{
         width: 8px;
-    }
-    
-    .chat-container::-webkit-scrollbar-track {
-        background: rgba(11, 11, 11, 0.5);
+    }}
+    .chat-container::-webkit-scrollbar-track {{
+        background: transparent;
+    }}
+    .chat-container::-webkit-scrollbar-thumb {{
+        background: rgba(134, 150, 160, 0.3);
         border-radius: 10px;
-    }
+    }}
     
-    .chat-container::-webkit-scrollbar-thumb {
-        background: #E50914;
-        border-radius: 10px;
-    }
+    .message-row-user {{ display: flex; justify-content: flex-end; width: 100%; }}
+    .message-row-assistant {{ display: flex; justify-content: flex-start; width: 100%; }}
     
-    .chat-container::-webkit-scrollbar-thumb:hover {
-        background: #B20710;
-    }
+    .user-message {{
+        background: {user_msg};
+        color: {user_text} !important;
+        padding: 0.5rem 0.75rem;
+        border-radius: 12px;
+        border-top-right-radius: 4px;
+        max-width: 75%;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        position: relative;
+    }}
+    .user-message * {{ color: {user_text} !important; }}
     
-    /* Chat Messages */
-    .user-message {
-        background: linear-gradient(135deg, #E50914 0%, #B20710 100%);
-        color: white;
-        padding: 1rem 1.5rem;
-        border-radius: 20px 20px 5px 20px;
-        margin: 0.5rem 0;
-        margin-left: 20%;
-        box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
-        animation: slideInRight 0.3s ease-out;
-    }
+    .assistant-message {{
+        background: {bot_msg};
+        color: {bot_text} !important;
+        padding: 0.5rem 0.75rem;
+        border-radius: 12px;
+        border-top-left-radius: 4px;
+        max-width: 75%;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        position: relative;
+    }}
+    .assistant-message * {{ color: {bot_text} !important; }}
     
-    .assistant-message {
-        background: rgba(45, 45, 45, 0.8);
-        color: #E5E5E5;
-        padding: 1rem 1.5rem;
-        border-radius: 20px 20px 20px 5px;
-        margin: 0.5rem 0;
-        margin-right: 20%;
-        border-left: 3px solid #E50914;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-        animation: slideInLeft 0.3s ease-out;
-    }
+    .user-message::before {{
+        content: ""; position: absolute; top: 0; right: -8px; width: 15px; height: 15px;
+        background: linear-gradient(135deg, {user_msg} 0%, {user_msg} 50%, transparent 50%, transparent);
+    }}
+    .assistant-message::before {{
+        content: ""; position: absolute; top: 0; left: -8px; width: 15px; height: 15px;
+        background: linear-gradient(225deg, {bot_msg} 0%, {bot_msg} 50%, transparent 50%, transparent);
+    }}
     
-    @keyframes slideInRight {
-        from {
-            opacity: 0;
-            transform: translateX(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    }
+    .message-content {{ display: inline-block; font-size: 0.95rem; line-height: 1.4; color: inherit; }}
+    .message-time {{ font-size: 0.65rem; color: {text_muted} !important; float: right; margin-left: 10px; margin-top: 10px; margin-bottom: -5px; }}
     
-    @keyframes slideInLeft {
-        from {
-            opacity: 0;
-            transform: translateX(-30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    }
-    
-    /* Message metadata */
-    .message-time {
-        font-size: 0.7rem;
-        color: #808080;
-        margin-top: 0.3rem;
-    }
-    
-    /* Example Queries */
-    .example-query {
-        background: rgba(31, 31, 31, 0.8);
-        border: 1px solid rgba(229, 9, 20, 0.3);
+    .example-query {{
+        background: {card_bg};
+        border: 1px solid {border_color};
         border-radius: 25px;
         padding: 0.6rem 1.2rem;
         margin: 0.4rem;
         display: inline-block;
-        color: #E5E5E5;
+        color: {text_main};
         cursor: pointer;
-        transition: all 0.3s ease;
-        font-size: 0.9rem;
-    }
+    }}
+    .example-query:hover {{ border-color: {hero_color}; }}
     
-    .example-query:hover {
-        background: linear-gradient(135deg, #E50914 0%, #B20710 100%);
-        border-color: #E50914;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(229, 9, 20, 0.4);
-    }
-    
-    /* Input Section */
-    .stTextInput > div > div > input {
-        background: rgba(31, 31, 31, 0.9) !important;
-        border: 2px solid rgba(229, 9, 20, 0.3) !important;
+    .stTextInput > div > div > input {{
+        background: {card_bg} !important;
+        border: 1px solid {border_color} !important;
         border-radius: 25px !important;
+        color: {text_main} !important;
+    }}
+    .stTextInput > div > div > input:focus {{ border-color: {hero_color} !important; box-shadow: none !important; }}
+    
+    .stButton > button {{
+        background: {btn_bg};
         color: white !important;
-        padding: 1rem 1.5rem !important;
-        font-size: 1rem !important;
-        transition: all 0.3s ease !important;
-    }
-    
-    .stTextInput > div > div > input:focus {
-        border-color: #E50914 !important;
-        box-shadow: 0 0 20px rgba(229, 9, 20, 0.4) !important;
-    }
-    
-    /* Buttons */
-    .stButton > button {
-        background: linear-gradient(135deg, #E50914 0%, #B20710 100%);
-        color: white;
-        border: none;
         border-radius: 25px;
+        border: none;
         padding: 0.7rem 2rem;
-        font-weight: 600;
-        font-size: 1rem;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
         width: 100%;
-    }
+        font-weight: 600;
+    }}
+    .stButton > button:hover {{ background: {btn_hover}; color: white !important; }}
     
-    .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 25px rgba(229, 9, 20, 0.5);
-        background: linear-gradient(135deg, #F40612 0%, #C00813 100%);
-    }
-    
-    .stButton > button:active {
-        transform: translateY(0);
-    }
-    
-    /* Movie Card */
-    .movie-card {
-        background: rgba(31, 31, 31, 0.8);
+    .movie-card {{
+        background: {card_bg};
         border-radius: 10px;
         padding: 1rem;
         margin: 0.5rem 0;
-        border-left: 4px solid #E50914;
-        transition: all 0.3s ease;
-    }
-    
-    .movie-card:hover {
-        background: rgba(45, 45, 45, 0.9);
-        transform: translateX(5px);
-        box-shadow: 0 5px 20px rgba(229, 9, 20, 0.2);
-    }
-    
-    .movie-title {
-        color: #FFFFFF;
-        font-size: 1.2rem;
-        font-weight: bold;
-        margin-bottom: 0.5rem;
-    }
-    
-    .movie-info {
-        color: #B3B3B3;
-        font-size: 0.9rem;
-        margin: 0.3rem 0;
-    }
-    
-    .movie-genre {
-        display: inline-block;
-        background: rgba(229, 9, 20, 0.2);
-        color: #E50914;
+        border-left: 4px solid {hero_color};
+    }}
+    .movie-title {{ color: {text_main}; font-size: 1.2rem; font-weight: bold; margin-bottom: 0.5rem; }}
+    .movie-info {{ color: {text_muted} !important; font-size: 0.9rem; margin: 0.3rem 0; }}
+    .movie-genre {{
+        background: rgba(37, 211, 102, 0.2);
+        color: {hero_color} !important;
         padding: 0.2rem 0.6rem;
         border-radius: 12px;
         font-size: 0.8rem;
         margin-right: 0.3rem;
+        display: inline-block;
         margin-top: 0.3rem;
-    }
+    }}
     
-    /* Loading Spinner */
-    .stSpinner > div {
-        border-top-color: #E50914 !important;
-    }
-    
-    /* Expander */
-    .streamlit-expanderHeader {
-        background: rgba(31, 31, 31, 0.8);
-        border-radius: 10px;
-        color: #E5E5E5 !important;
-        font-weight: 600;
-    }
-    
-    .streamlit-expanderHeader:hover {
-        background: rgba(45, 45, 45, 0.9);
-        border-left: 4px solid #E50914;
-    }
-    
-    /* Success/Error Messages */
-    .stSuccess {
-        background: rgba(0, 230, 118, 0.1) !important;
-        border-left: 4px solid #00E676 !important;
-        color: #00E676 !important;
-    }
-    
-    .stError {
-        background: rgba(229, 9, 20, 0.1) !important;
-        border-left: 4px solid #E50914 !important;
-        color: #FF6B6B !important;
-    }
-    
-    .stWarning {
-        background: rgba(255, 193, 7, 0.1) !important;
-        border-left: 4px solid #FFC107 !important;
-        color: #FFD54F !important;
-    }
-    
-    /* Info box */
-    .info-box {
-        background: rgba(31, 31, 31, 0.6);
-        border-left: 4px solid #E50914;
-        border-radius: 8px;
-        padding: 1rem;
-        margin: 1rem 0;
-        color: #B3B3B3;
-    }
-    
-    /* Stats boxes */
-    .stat-box {
-        background: linear-gradient(135deg, rgba(229, 9, 20, 0.1) 0%, rgba(31, 31, 31, 0.8) 100%);
+    .stat-box {{
+        background: {card_bg};
         border-radius: 10px;
         padding: 1.5rem;
         text-align: center;
-        border: 1px solid rgba(229, 9, 20, 0.2);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    }
-    
-    .stat-number {
-        font-size: 2.5rem;
-        color: #E50914;
-        font-weight: bold;
-        text-shadow: 0 0 10px rgba(229, 9, 20, 0.5);
-    }
-    
-    .stat-label {
-        font-size: 0.9rem;
-        color: #B3B3B3;
-        margin-top: 0.5rem;
-    }
-    
-    /* Fade in animation */
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    .fade-in {
-        animation: fadeIn 0.5s ease-out;
-    }
-    # Add this inside the <style> tag in inject_custom_css()
-
-    /* Poster hover effect */
-    .movie-card img {
-        transition: all 0.3s ease;
-    }
-    
-    .movie-card:hover img {
-        transform: scale(1.05);
-        box-shadow: 0 8px 16px rgba(229, 9, 20, 0.4);
-    }
-    
-    /* Loading skeleton for images */
-    .poster-skeleton {
-        width: 100px;
-        height: 150px;
-        background: linear-gradient(
-            90deg,
-            rgba(31, 31, 31, 0.8) 25%,
-            rgba(45, 45, 45, 0.9) 50%,
-            rgba(31, 31, 31, 0.8) 75%
-        );
-        background-size: 200% 100%;
-        animation: loading 1.5s infinite;
-        border-radius: 8px;
-    }
-    
-    @keyframes loading {
-        0% { background-position: 200% 0; }
-        100% { background-position: -200% 0; }
-    }            
+        border: 1px solid {border_color};
+    }}
+    .stat-number {{ font-size: 2.5rem; color: {hero_color}; font-weight: bold; }}
+    .stat-label {{ font-size: 0.9rem; color: {text_muted} !important; }}
+    .info-box {{ background: {card_bg}; border-left: 4px solid {hero_color}; border-radius: 8px; padding: 1rem; color: {text_muted} !important; }}
     </style>
     """, unsafe_allow_html=True)
-
-# ============================================================================
-# HELPER FUNCTIONS
-# ============================================================================
-
 def load_lottie_url(url: str):
     """Load Lottie animation from URL"""
     try:
@@ -480,6 +278,9 @@ def initialize_session_state():
     
     if 'current_input' not in st.session_state:
         st.session_state.current_input = ""
+    if 'theme' not in st.session_state:
+        st.session_state.theme = "dark"
+
 
 def initialize_rag_system():
     """Initialize the RAG system"""
@@ -596,8 +397,13 @@ def set_example_query(query):
 def render_sidebar():
     """Render the sidebar with filters"""
     with st.sidebar:
-        st.markdown('<div class="sidebar-title">🎯 Advanced Filters</div>', unsafe_allow_html=True)
+        st.markdown('<div class="sidebar-title">⚙️ Settings</div>', unsafe_allow_html=True)
+        # Theme toggle
+        is_dark = st.toggle("🌙 Dark Mode", value=(st.session_state.theme == 'dark'))
+        st.session_state.theme = 'dark' if is_dark else 'light'
+        
         st.markdown('<div class="netflix-divider"></div>', unsafe_allow_html=True)
+        st.markdown('<div class="sidebar-title">🎯 Advanced Filters</div>', unsafe_allow_html=True)
         
         # Genre filter
         st.markdown('<div class="filter-header">Genre</div>', unsafe_allow_html=True)
@@ -707,17 +513,17 @@ def render_sidebar():
 def main():
     """Main application"""
     
-    # Inject CSS
-    inject_custom_css()
-    
-    # Initialize session state
+    # Initialize session state FIRST
     initialize_session_state()
     
     # Render sidebar and get filters
     filters = render_sidebar()
     
+    # Inject CSS based on theme
+    inject_custom_css(st.session_state.theme)
+    
     # Hero Section
-    st.markdown('<h1 class="hero-title">NETFLIX GPT</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 class="hero-title">WhatsApp Movie GPT</h1>', unsafe_allow_html=True)
     st.markdown('<p class="hero-tagline">Your AI-powered movie discovery assistant 🎬</p>', unsafe_allow_html=True)
     st.markdown('<div class="netflix-divider"></div>', unsafe_allow_html=True)
     
@@ -758,54 +564,48 @@ def main():
         if st.session_state.chat_history:
             st.markdown('<div class="chat-container">', unsafe_allow_html=True)
             
+            from markdown_it import MarkdownIt
+            md = MarkdownIt()
+            
             for message in st.session_state.chat_history:
                 if message['role'] == 'user':
                     st.markdown(f'''
-                    <div class="user-message">
-                        {message['content']}
-                        <div class="message-time">{message.get('timestamp', '')}</div>
+                    <div class="message-row-user">
+                        <div class="user-message">
+                            <span class="message-content">{md.render(message['content'])}</span>
+                            <span class="message-time">{message.get('timestamp', 'Now')}</span>
+                        </div>
                     </div>
                     ''', unsafe_allow_html=True)
-                # else:
-                #     st.markdown(f'''
-                #     <div class="assistant-message">
-                #         {message['content']}
-                #         <div class="message-time">{message.get('timestamp', '')}</div>
-                #     </div>
-                #     ''', unsafe_allow_html=True)
                 else:
                     # Assistant message with enhanced display
                     st.markdown(f'''
-                    <div class="assistant-message">
-                        {message['content']}
-                        <div class="message-time">{message.get('timestamp', '')}</div>
+                    <div class="message-row-assistant">
+                        <div class="assistant-message">
+                            <span class="message-content">{md.render(message['content'])}</span>
+                            <span class="message-time">{message.get('timestamp', 'Now')}</span>
+                        </div>
                     </div>
                     ''', unsafe_allow_html=True)
                     
-                    # Show sources with posters
+                    # Show sources with inline WhatsApp attachment style
                     if message.get('sources'):
-                        with st.expander("📚 View Movie Details", expanded=False):
-                            sources_html = format_sources(message['sources'])
-                            st.markdown(sources_html, unsafe_allow_html=True)
-                            
-                            # Optional: Show as grid
-                            cols = st.columns(min(3, len(message['sources'])))
-                            sources_with_posters = get_multiple_posters(message['sources'][:3])
-                            
-                            for idx, (col, source) in enumerate(zip(cols, sources_with_posters)):
-                                with col:
-                                    if source.get('poster_url'):
-                                        st.image(
-                                            source['poster_url'],
-                                            caption=f"{source['title']} ({source.get('year', 'N/A')})",
-                                        )
-                                        if source.get('vote_average'):
-                                            st.markdown(f"⭐ **{source['vote_average']}/10**")
-                    
-                    # Show sources if available
-                    #if message.get('sources'):
-                        #with st.expander("📚 View Sources"):
-                            #st.markdown(format_sources(message['sources']), unsafe_allow_html=True)
+                        sources_with_posters = get_multiple_posters(message['sources'])
+                        
+                        # Use pure HTML flexbox instead of Streamlit columns so it dynamically wraps 1..N posters
+                        html_content = '<div style="margin-top: 10px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 15px;">'
+                        
+                        # Dynamically size width based on poster count to mimic an expanding wrap (min 120px max wide)
+                        width_css = "flex: 1 1 120px; max-width: 160px; min-width: 120px;" if len(sources_with_posters) > 1 else "max-width: 250px;"
+                        
+                        for source in sources_with_posters:
+                            if source.get('poster_url'):
+                                html_content += f'<div style="{width_css} background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.05);"><img src="{source["poster_url"]}" style="width: 100%; height: auto; display: block; object-fit: cover; aspect-ratio: 2/3;"><div style="padding: 8px;"><div style="font-size: 0.85rem; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #000000;">{source["title"]}</div><div style="font-size: 0.75rem; color: #667781;">{source.get("year", "")}</div></div></div>'
+                            else:
+                                html_content += f'<div style="{width_css} background: #ffffff; border-radius: 8px; padding: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.05); aspect-ratio: 2/3; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;"><div style="font-size: 2rem; margin-bottom: 5px;">🎬</div><div style="font-size: 0.85rem; font-weight: bold; color: #000000;">{source["title"]}</div><div style="font-size: 0.75rem; color: #667781;">{source.get("year", "")}</div></div>'
+                        
+                        html_content += '</div>'
+                        st.markdown(html_content, unsafe_allow_html=True)
             
             #st.markdown('</div>', unsafe_allow_html=True)
         else:
@@ -839,7 +639,7 @@ def main():
         st.session_state.current_input = ""
         
         # Add user message
-        timestamp = datetime.now().strftime("%H:%M")
+        timestamp = datetime.now().strftime("%I:%M %p")
         st.session_state.chat_history.append({
             'role': 'user',
             'content': user_input,

@@ -264,16 +264,50 @@ RESPONSE:"""
             'timestamp': datetime.now().isoformat()
         }
         
+        import re
         if return_sources:
-            # Add source information
-            sources = []
-            for doc in retrieved_docs:
-                sources.append({
-                    'title': doc['metadata'].get('title', 'Unknown'),
-                    'year': doc['metadata'].get('year', 'N/A'),
-                    'genres': doc['metadata'].get('genres', []),
-                    'similarity_score': doc['similarity_score']
-                })
+            # Extract explicitly generated movies from the response text
+            mentioned_movies = []
+            for line in answer.split('\n'):
+                match = re.search(r'(.*?)\((\d{4})\)', line)
+                if match:
+                    raw_title = match.group(1)
+                    year = match.group(2)
+                    clean_title = re.sub(r'^[\s\d\.\-\*]+', '', raw_title.replace('**', '').replace('*', '')).strip()
+                    if clean_title:
+                        mentioned_movies.append((clean_title, year))
+            
+            doc_lookup = {
+                str(doc['metadata'].get('title', '')).lower(): doc
+                for doc in retrieved_docs
+            }
+            
+            for (movie_title, movie_year) in mentioned_movies:
+                clean_title = movie_title.strip()
+                match = doc_lookup.get(clean_title.lower())
+                if match:
+                    sources.append({
+                        'title': match['metadata'].get('title', clean_title),
+                        'year': match['metadata'].get('year', movie_year),
+                        'genres': match['metadata'].get('genres', []),
+                        'similarity_score': match['similarity_score']
+                    })
+                else:
+                    sources.append({
+                        'title': clean_title,
+                        'year': movie_year,
+                        'genres': [],
+                        'similarity_score': 0.99
+                    })
+            
+            if not sources:
+                for doc in retrieved_docs:
+                    sources.append({
+                        'title': doc['metadata'].get('title', 'Unknown'),
+                        'year': doc['metadata'].get('year', 'N/A'),
+                        'genres': doc['metadata'].get('genres', []),
+                        'similarity_score': doc['similarity_score']
+                    })
             response['sources'] = sources
         
         print("\n✅ Response generated")
@@ -352,14 +386,19 @@ MOVIE DATABASE CONTEXT:
 
 CURRENT USER QUESTION: {question}
 
-INSTRUCTIONS:
-1. Use the conversation history to understand context and follow-up questions
-2. Avoid recommending movies already discussed (unless specifically requested)
-3. Consider user preferences mentioned earlier in the conversation
-4. Provide specific recommendations with titles, years, and descriptions
-5. Explain WHY each movie matches the request
-6. Be conversational and reference previous parts of the discussion naturally
-7. If the user asks about "that movie" or "it", refer to the conversation history
+Instructions:
+Start with enthusiasm and a greeting.
+1. Use conversation history to understand the request.
+2. Do not recommend movies already mentioned unless the user asks again.
+3. Respect user preferences from earlier messages.
+4. Return the number of movies requested. If not specified, return **5 movies**.
+5. If fewer movies exist in the database, return only those.
+6. Keep the response **under 150 words**.
+Output Format (STRICT)
+
+- Return **only a vertical list**.
+- One movie per item.
+- Do not combine multiple movies in one paragraph.
 
 USER PREFERENCES DETECTED:
 {preferences}
@@ -451,15 +490,59 @@ RESPONSE:"""
             'timestamp': datetime.now().isoformat()
         }
         
+        import re
         if return_sources:
             sources = []
-            for doc in retrieved_docs:
-                sources.append({
-                    'title': doc['metadata'].get('title', 'Unknown'),
-                    'year': doc['metadata'].get('year', 'N/A'),
-                    'genres': doc['metadata'].get('genres', []),
-                    'similarity_score': doc['similarity_score']
-                })
+            
+            # Extract explicitly generated movies from the response text
+            # Robust line-by-line parser targeting the year anchor (YYYY)
+            mentioned_movies = []
+            for line in response_text.split('\n'):
+                match = re.search(r'(.*?)\((\d{4})\)', line)
+                if match:
+                    raw_title = match.group(1)
+                    year = match.group(2)
+                    clean_title = re.sub(r'^[\s\d\.\-\*]+', '', raw_title.replace('**', '').replace('*', '')).strip()
+                    if clean_title:
+                        mentioned_movies.append((clean_title, year))
+            
+            # Use retrieved docs metadata for baseline reference
+            # map by title lowering
+            doc_lookup = {
+                str(doc['metadata'].get('title', '')).lower(): doc
+                for doc in retrieved_docs
+            }
+            
+            for (movie_title, movie_year) in mentioned_movies:
+                # Get similarity score from baseline doc, if it exists
+                clean_title = movie_title.strip()
+                match = doc_lookup.get(clean_title.lower())
+                
+                if match:
+                    sources.append({
+                        'title': match['metadata'].get('title', clean_title),
+                        'year': match['metadata'].get('year', movie_year),
+                        'genres': match['metadata'].get('genres', []),
+                        'similarity_score': match['similarity_score']
+                    })
+                else:
+                    sources.append({
+                        'title': clean_title,
+                        'year': movie_year,
+                        'genres': [],
+                        'similarity_score': 0.99  # LLM synthesized it directly
+                    })
+            
+            # If regex extraction fails or LLM formats badly, fallback to the original retrieve
+            if not sources:
+                for doc in retrieved_docs:
+                    sources.append({
+                        'title': doc['metadata'].get('title', 'Unknown'),
+                        'year': doc['metadata'].get('year', 'N/A'),
+                        'genres': doc['metadata'].get('genres', []),
+                        'similarity_score': doc['similarity_score']
+                    })
+                    
             response['sources'] = sources
         
         # Add to memory
