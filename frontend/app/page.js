@@ -8,8 +8,16 @@ export default function Home() {
   const [prompt, setPrompt] = useState("");
   const [mood, setMood] = useState("");
   const [loading, setLoading] = useState(false);
-  const [response, setResponse] = useState(null);
-  const [sources, setSources] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, loading]);
 
   // Loading Messages State
   const loadingMessages = [
@@ -92,16 +100,18 @@ export default function Home() {
   };
 
   const handleSend = async () => {
-    if (!prompt) return;
+    if (!prompt.trim()) return;
+    const currentPrompt = prompt;
+    setPrompt(""); // clear early to feel responsive
+    setMessages(prev => [...prev, { type: 'user', content: currentPrompt }]);
+
     setLoading(true);
-    setResponse(null);
-    setSources([]);
     try {
       const res = await fetch("http://localhost:8000/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          prompt,
+          prompt: currentPrompt,
           mood,
           genre,
           min_year: minYear,
@@ -111,12 +121,9 @@ export default function Home() {
         })
       });
       const data = await res.json();
-      setResponse(data.response);
-      if (data.sources) {
-        setSources(data.sources);
-      }
+      setMessages(prev => [...prev, { type: 'ai', content: data.response, sources: data.sources || [] }]);
     } catch (err) {
-      setResponse("Error communicating with AI server.");
+      setMessages(prev => [...prev, { type: 'ai', content: "Error communicating with AI server." }]);
     }
     setLoading(false);
   };
@@ -200,29 +207,95 @@ export default function Home() {
           {/* Avatar side image removed */}
 
           <div className={styles.contentZ}>
-            {/* Avatar & Greeting */}
-            <div className={styles.avatarSection}>
-              <div className={styles.avatarRing} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem' }}>
-                🤖
+            {/* Avatar & Greeting (Only show if no messages yet) */}
+            {messages.length === 0 && (
+              <div className={styles.avatarSection}>
+                <div className={styles.avatarRing} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem' }}>
+                  🤖
+                </div>
+                <div className={styles.greetingBox}>
+                  <p><b>Hello!</b> Let's find the perfect movie for you.</p>
+                  <p>What are you in the mood for?</p>
+                </div>
               </div>
-              <div className={styles.greetingBox}>
-                <p><b>Hello!</b> Let's find the perfect movie for you.</p>
-                <p>What are you in the mood for?</p>
-              </div>
-            </div>
+            )}
 
-            {/* Mood Buttons */}
-            <div className={styles.moodRow}>
-              {moods.map(m => (
-                <button
-                  key={m.label}
-                  className={styles.moodBtn}
-                  style={{ borderColor: mood === m.label ? m.color : 'var(--glass-border)', boxShadow: mood === m.label ? `0 0 10px ${m.color}` : 'none' }}
-                  onClick={() => setMood(m.label)}
-                >
-                  {m.emoji} {m.label}
-                </button>
+            {/* Mood Buttons (Only show if no messages yet) */}
+            {messages.length === 0 && (
+              <div className={styles.moodRow}>
+                {moods.map(m => (
+                  <button
+                    key={m.label}
+                    className={styles.moodBtn}
+                    style={{ borderColor: mood === m.label ? m.color : 'var(--glass-border)', boxShadow: mood === m.label ? `0 0 10px ${m.color}` : 'none' }}
+                    onClick={() => setMood(m.label)}
+                  >
+                    {m.emoji} {m.label}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Chat History */}
+            <div className={styles.chatHistory}>
+              {messages.map((msg, idx) => (
+                <div key={idx} className={msg.type === 'user' ? styles.userMessage : styles.aiMessage}>
+                  {msg.type === 'user' ? (
+                    <div className={styles.userBubble}>{msg.content}</div>
+                  ) : (
+                    <div className={styles.aiBubble}>
+                      <div className={styles.markdownContent}>
+                        <ReactMarkdown>{msg.content}</ReactMarkdown>
+                      </div>
+
+                      {/* Dynamic Recommended Movie Cards */}
+                      {msg.sources && msg.sources.length > 0 && (
+                        <div className={styles.resultsArea} style={{ marginTop: '20px' }}>
+                          <h3 style={{ color: 'var(--text-muted)' }}>Source Material</h3>
+                          <div className={styles.moviesCarousel}>
+                            {msg.sources.map((src, sIdx) => (
+                              <div key={sIdx} className={styles.movieCard}>
+                                <img
+                                  src={src.poster_path || "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&q=80&w=220&h=300"}
+                                  alt={src.title}
+                                  style={{ borderRadius: '8px', height: '180px', objectFit: 'cover' }}
+                                  onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&q=80&w=220&h=300"; }}
+                                />
+                                <h3 className={styles.movieTitle}>{src.title}</h3>
+                                <div className={styles.movieMeta}>
+                                  <span>{src.year || "N/A"}</span>
+                                  {src.rating && (
+                                    <span className={styles.movieRating}>★ {src.rating}</span>
+                                  )}
+                                  <span style={{ background: '#ffcc00', color: 'black', padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 'bold' }}>TMDB</span>
+                                </div>
+                                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '5px 0', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                                  {src.overview || src.description || "A recommended movie based on your prompt."}
+                                </p>
+                                <button className={styles.playBtn}>▶ View Details <span>+</span></button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               ))}
+
+              {/* Loading Indicator */}
+              {loading && (
+                <div className={styles.aiMessage}>
+                  <div className={styles.aiBubble} style={{ display: 'inline-block', width: 'auto', animation: 'pulse 1.5s infinite', border: '1px solid var(--neon-purple)' }}>
+                    <span style={{ fontSize: '1.2rem', color: 'var(--neon-blue)', fontWeight: 'bold' }}>
+                      ✨ {loadingMessages[loadingMessageIndex]}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Invisible div to scroll to */}
+              <div ref={messagesEndRef} />
             </div>
 
             {/* Input Bar */}
@@ -251,59 +324,7 @@ export default function Home() {
               </button>
             </div>
 
-            {/* Results */}
-            {loading && (
-              <div className={styles.resultsArea}>
-                <div style={{ background: 'rgba(0,0,0,0.6)', padding: '20px', borderRadius: '16px', border: '1px solid var(--neon-purple)', textAlign: 'center', animation: 'pulse 1.5s infinite' }}>
-                  <span style={{ fontSize: '1.2rem', color: 'var(--neon-blue)', fontWeight: 'bold' }}>
-                    ✨ {loadingMessages[loadingMessageIndex]}
-                  </span>
-                </div>
-              </div>
-            )}
 
-            {response && !loading && (
-              <div className={styles.resultsArea}>
-                {/* Properly render the AI Markdown response */}
-                <div
-                  className={styles.markdownContent}
-                  style={{ background: 'rgba(0,0,0,0.6)', padding: '20px', borderRadius: '16px', border: '1px solid var(--neon-blue)', whiteSpace: 'normal', color: 'white', lineHeight: '1.6' }}
-                >
-                  <ReactMarkdown>{response}</ReactMarkdown>
-                </div>
-              </div>
-            )}
-
-            {/* Dynamic Recommended Movie Cards */}
-            {response && !loading && sources.length > 0 && (
-              <div className={styles.resultsArea} style={{ marginTop: '20px' }}>
-                <h3 style={{ color: 'var(--text-muted)' }}>Source Material</h3>
-                <div className={styles.moviesCarousel}>
-                  {sources.map((src, idx) => (
-                    <div key={idx} className={styles.movieCard}>
-                      <img
-                        src={src.poster_path || "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&q=80&w=220&h=300"}
-                        alt={src.title}
-                        style={{ borderRadius: '8px', height: '180px', objectFit: 'cover' }}
-                        onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&q=80&w=220&h=300"; }}
-                      />
-                      <h3 className={styles.movieTitle}>{src.title}</h3>
-                      <div className={styles.movieMeta}>
-                        <span>{src.year || "N/A"}</span>
-                        {src.rating && (
-                          <span className={styles.movieRating}>★ {src.rating}</span>
-                        )}
-                        <span style={{ background: '#ffcc00', color: 'black', padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 'bold' }}>TMDB</span>
-                      </div>
-                      <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '5px 0', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
-                        {src.overview || src.description || "A recommended movie based on your prompt."}
-                      </p>
-                      <button className={styles.playBtn}>▶ View Details <span>+</span></button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </main>

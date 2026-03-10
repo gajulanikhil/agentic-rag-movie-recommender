@@ -5,6 +5,7 @@ Combines retrieval + LLM generation for movie recommendations
 
 from typing import List, Dict, Any, Optional
 import json
+import requests
 from datetime import datetime
 from conversation_memory import ConversationMemory
 
@@ -545,27 +546,33 @@ RESPONSE:"""
             
             # Enrich sources with TMDB metadata for Next.js Frontend
             import os
-            from dotenv import load_dotenv
-            load_dotenv()
+            from dotenv import load_dotenv, find_dotenv
+            load_dotenv(find_dotenv())
             TMDB_API_KEY = os.getenv("TMDB_API_KEY") # Use valid key from .env file
-            if TMDB_API_KEY:
-                for source in sources:
-                    try:
-                        title = source.get('title')
-                        if title and title != 'Unknown':
-                            # Make a fast search query to TMDB
-                            tmdb_url = f"https://api.themoviedb.org/3/search/movie?api_key={TMDB_API_KEY}&query={title}"
-                            tmdb_res = requests.get(tmdb_url, timeout=3).json()
-                            if tmdb_res.get('results') and len(tmdb_res['results']) > 0:
-                                top_hit = tmdb_res['results'][0]
-                                # Extract poster and description
-                                if top_hit.get('poster_path'):
-                                    source['poster_path'] = f"https://image.tmdb.org/t/p/w500{top_hit['poster_path']}"
-                                source['overview'] = top_hit.get('overview', "A recommended movie.")
-                                source['rating'] = round(top_hit.get('vote_average', 0.0), 1)
-                    except Exception as tmdb_e:
-                        import logging
-                        logging.warning(f"Failed to fetch TMDB data for {title}: {tmdb_e}")
+            
+            with open("tmdb_debug.log", "a", encoding="utf-8") as debug_file:
+                debug_file.write(f"\\n--- TMDB Fetch Initiation ---\\nAPI_KEY Loaded: {'Yes' if TMDB_API_KEY else 'No'}\\n")
+                if TMDB_API_KEY:
+                    for source in sources:
+                        try:
+                            title = source.get('title')
+                            debug_file.write(f"Evaluating Source Title: {title}\\n")
+                            if title and title != 'Unknown':
+                                tmdb_url = f"https://api.themoviedb.org/3/search/movie?api_key={TMDB_API_KEY}&query={title}"
+                                tmdb_res = requests.get(tmdb_url, timeout=5).json()
+                                if tmdb_res.get('results') and len(tmdb_res['results']) > 0:
+                                    top_hit = tmdb_res['results'][0]
+                                    if top_hit.get('poster_path'):
+                                        source['poster_path'] = f"https://image.tmdb.org/t/p/w500{top_hit['poster_path']}"
+                                    source['overview'] = top_hit.get('overview', "A recommended movie.")
+                                    source['rating'] = round(top_hit.get('vote_average', 0.0), 1)
+                                    debug_file.write(f"SUCCESS: Attached TMDB metadata for {title}\\n")
+                                else:
+                                    debug_file.write(f"NO RESULTS: TMDB returned empty for {title}\\n")
+                        except Exception as tmdb_e:
+                            debug_file.write(f"ERROR: Exception fetching {title} -> {tmdb_e}\\n")
+                            import logging
+                            logging.warning(f"Failed to fetch TMDB data for {title}: {tmdb_e}")
 
             response['sources'] = sources
         
