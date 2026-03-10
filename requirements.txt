@@ -4,6 +4,9 @@ langchain-community==0.0.13
 
 # Vector Database
 chromadb
+fastapi
+uvicorn
+python-multipart
 
 # Embeddings
 sentence-transformers==2.3.1

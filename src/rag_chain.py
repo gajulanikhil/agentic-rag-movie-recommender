@@ -534,15 +534,39 @@ RESPONSE:"""
                     })
             
             # If regex extraction fails or LLM formats badly, fallback to the original retrieve
-            if not sources:
+            if not sources and retrieved_docs:
                 for doc in retrieved_docs:
                     sources.append({
                         'title': doc['metadata'].get('title', 'Unknown'),
                         'year': doc['metadata'].get('year', 'N/A'),
                         'genres': doc['metadata'].get('genres', []),
-                        'similarity_score': doc['similarity_score']
+                        'similarity_score': doc.get('similarity_score', 0.99)
                     })
-                    
+            
+            # Enrich sources with TMDB metadata for Next.js Frontend
+            import os
+            from dotenv import load_dotenv
+            load_dotenv()
+            TMDB_API_KEY = os.getenv("TMDB_API_KEY") # Use valid key from .env file
+            if TMDB_API_KEY:
+                for source in sources:
+                    try:
+                        title = source.get('title')
+                        if title and title != 'Unknown':
+                            # Make a fast search query to TMDB
+                            tmdb_url = f"https://api.themoviedb.org/3/search/movie?api_key={TMDB_API_KEY}&query={title}"
+                            tmdb_res = requests.get(tmdb_url, timeout=3).json()
+                            if tmdb_res.get('results') and len(tmdb_res['results']) > 0:
+                                top_hit = tmdb_res['results'][0]
+                                # Extract poster and description
+                                if top_hit.get('poster_path'):
+                                    source['poster_path'] = f"https://image.tmdb.org/t/p/w500{top_hit['poster_path']}"
+                                source['overview'] = top_hit.get('overview', "A recommended movie.")
+                                source['rating'] = round(top_hit.get('vote_average', 0.0), 1)
+                    except Exception as tmdb_e:
+                        import logging
+                        logging.warning(f"Failed to fetch TMDB data for {title}: {tmdb_e}")
+
             response['sources'] = sources
         
         # Add to memory

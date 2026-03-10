@@ -34,44 +34,29 @@ st.set_page_config(
 # ============================================================================
 
 def inject_custom_css(theme="dark"):
-    """Inject custom CSS for WhatsApp-style UI"""
-    if theme == "dark":
-        bg_gradient = "linear-gradient(to bottom, #0B141A 0%, #111B21 100%)"
-        sidebar_bg = "#111b21"
-        hero_color = "#25D366"
-        text_main = "#E9EDEF"
-        text_muted = "#8696A0"
-        card_bg = "#202c33"
-        btn_bg = "linear-gradient(135deg, #00A884 0%, #008F6F 100%)"
-        btn_hover = "linear-gradient(135deg, #00BFA5 0%, #009688 100%)"
-        chat_bg = "#0b141a"
-        user_msg = "#005c4b"
-        user_text = "#e9edef"
-        bot_msg = "#202c33"
-        bot_text = "#e9edef"
-        border_color = "rgba(255,255,255,0.1)"
-    else:
-        bg_gradient = "linear-gradient(to bottom, #efeae2 0%, #f0f2f5 100%)"
-        sidebar_bg = "#ffffff"
-        hero_color = "#128C7E"
-        text_main = "#111B21"
-        text_muted = "#667781"
-        card_bg = "#ffffff"
-        btn_bg = "linear-gradient(135deg, #25D366 0%, #128C7E 100%)"
-        btn_hover = "linear-gradient(135deg, #128C7E 0%, #075E54 100%)"
-        chat_bg = "#efeae2"
-        user_msg = "#d9fdd3"
-        user_text = "#111b21"
-        bot_msg = "#ffffff"
-        bot_text = "#111b21"
-        border_color = "rgba(0,0,0,0.1)"
+    """Inject custom CSS for Perplexity-style UI"""
+    # Perplexity Dark Theme Colors
+    bg_gradient = "#191A1A"
+    sidebar_bg = "#151617"
+    hero_color = "#E8E8E8"
+    text_main = "#E8E8E8"
+    text_muted = "#A0A0A0"
+    card_bg = "#202222"
+    btn_bg = "#FFFFFF"
+    btn_hover = "#F0F0F0"
+    chat_bg = "transparent"
+    user_msg = "transparent"
+    user_text = "#E8E8E8"
+    bot_msg = "transparent"
+    bot_text = "#E8E8E8"
+    border_color = "#303234"
 
     st.markdown(f"""
     <style>
-    @import url('https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,300,400&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
     
     * {{
-        font-family: 'Satoshi', sans-serif;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }}
     
     .stApp {{
@@ -81,26 +66,20 @@ def inject_custom_css(theme="dark"):
     #MainMenu, footer, header {{visibility: hidden;}}
     
     .hero-title {{
-        font-size: 3.5rem;
+        font-size: 2.5rem;
         color: {hero_color};
         text-align: center;
-        font-weight: bold;
+        font-weight: 500;
         margin-bottom: 0;
-        letter-spacing: 0.05em;
+        letter-spacing: -0.02em;
     }}
     
     .hero-tagline {{
-        font-size: 1.2rem;
-        color: {text_muted};
-        text-align: center;
-        margin-top: 0.5rem;
-        margin-bottom: 2rem;
+        display: none; /* Hide tagline for minimalist look */
     }}
     
     .netflix-divider {{
-        height: 2px;
-        background: {border_color};
-        margin: 2rem 0;
+        display: none; /* Hide dividers for cleaner look */
     }}
     
     section[data-testid="stSidebar"] {{
@@ -109,152 +88,238 @@ def inject_custom_css(theme="dark"):
     }}
     
     .sidebar-title {{
-        color: {hero_color};
-        font-size: 1.5rem;
-        font-weight: bold;
-        text-align: center;
-        margin-bottom: 1.5rem;
+        color: {text_main};
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
     }}
     
     .filter-header {{
         color: {text_main} !important;
-        font-size: 1rem;
-        font-weight: 600;
+        font-size: 0.9rem;
+        font-weight: 500;
         margin-top: 1rem;
-        border-left: 3px solid {hero_color};
-        padding-left: 0.5rem;
+        margin-bottom: 0.5rem;
     }}
     
     section[data-testid="stSidebar"] label, .streamlit-expanderHeader, p, div {{
         color: {text_main} !important;
     }}
     
+    /* Hide the chat container border and background */
     .chat-container {{
         background: {chat_bg};
-        border-radius: 15px;
-        padding: 1.5rem;
+        padding: 1rem 0;
         margin: 1rem 0;
-        border: 1px solid {border_color};
+        border: none;
         max-height: 500px;
         overflow-y: auto;
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 1.5rem;
     }}
     
     .chat-container::-webkit-scrollbar {{
-        width: 8px;
+        width: 6px;
     }}
     .chat-container::-webkit-scrollbar-track {{
         background: transparent;
     }}
     .chat-container::-webkit-scrollbar-thumb {{
-        background: rgba(134, 150, 160, 0.3);
+        background: rgba(255, 255, 255, 0.1);
         border-radius: 10px;
     }}
     
+    /* Messages layout */
     .message-row-user {{ display: flex; justify-content: flex-end; width: 100%; }}
     .message-row-assistant {{ display: flex; justify-content: flex-start; width: 100%; }}
     
     .user-message {{
-        background: {user_msg};
+        background: #26282A;
         color: {user_text} !important;
-        padding: 0.5rem 0.75rem;
-        border-radius: 12px;
-        border-top-right-radius: 4px;
-        max-width: 75%;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-        position: relative;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        padding: 0.8rem 1.2rem;
+        border-radius: 20px;
+        max-width: 80%;
+        font-size: 1.05rem;
+        line-height: 1.5;
+        font-weight: 500;
     }}
     .user-message * {{ color: {user_text} !important; }}
     
     .assistant-message {{
         background: {bot_msg};
         color: {bot_text} !important;
-        padding: 0.5rem 0.75rem;
-        border-radius: 12px;
-        border-top-left-radius: 4px;
-        max-width: 75%;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-        position: relative;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        padding: 0.5rem 0;
+        max-width: 100%;
+        font-size: 1rem;
+        line-height: 1.6;
     }}
     .assistant-message * {{ color: {bot_text} !important; }}
     
-    .user-message::before {{
-        content: ""; position: absolute; top: 0; right: -8px; width: 15px; height: 15px;
-        background: linear-gradient(135deg, {user_msg} 0%, {user_msg} 50%, transparent 50%, transparent);
-    }}
-    .assistant-message::before {{
-        content: ""; position: absolute; top: 0; left: -8px; width: 15px; height: 15px;
-        background: linear-gradient(225deg, {bot_msg} 0%, {bot_msg} 50%, transparent 50%, transparent);
-    }}
+    .message-content {{ display: inline-block; width: 100%; }}
+    .message-time {{ display: none; }} /* Hide timestamps for cleaner look */
     
-    .message-content {{ display: inline-block; font-size: 0.95rem; line-height: 1.4; color: inherit; }}
-    .message-time {{ font-size: 0.65rem; color: {text_muted} !important; float: right; margin-left: 10px; margin-top: 10px; margin-bottom: -5px; }}
-    
-    .example-query {{
-        background: {card_bg};
-        border: 1px solid {border_color};
-        border-radius: 25px;
-        padding: 0.6rem 1.2rem;
-        margin: 0.4rem;
-        display: inline-block;
-        color: {text_main};
-        cursor: pointer;
-    }}
-    .example-query:hover {{ border-color: {hero_color}; }}
-    
+    /* Input Search Bar */
     .stTextInput > div > div > input {{
         background: {card_bg} !important;
         border: 1px solid {border_color} !important;
-        border-radius: 25px !important;
+        border-radius: 32px !important;
         color: {text_main} !important;
+        padding: 0.8rem 1.5rem !important;
+        font-size: 1rem;
     }}
-    .stTextInput > div > div > input:focus {{ border-color: {hero_color} !important; box-shadow: none !important; }}
+    .stTextInput > div > div > input:focus {{ 
+        border-color: #505050 !important; 
+        box-shadow: none !important; 
+    }}
     
+    /* Submit Button inside or near search */
     .stButton > button {{
-        background: {btn_bg};
-        color: white !important;
-        border-radius: 25px;
+        background: #FFFFFF;
+        color: #000000 !important;
+        border-radius: 50%;
         border: none;
-        padding: 0.7rem 2rem;
-        width: 100%;
-        font-weight: 600;
+        width: 36px !important;
+        height: 36px !important;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        transition: opacity 0.2s;
+        margin-left: auto;
     }}
-    .stButton > button:hover {{ background: {btn_hover}; color: white !important; }}
+    .stButton > button:hover {{ opacity: 0.8; color: #000000 !important; background: #FFFFFF; }}
     
+    .stButton > button p {{
+        margin: 0;
+        font-size: 1.2rem;
+        line-height: 1;
+        color: #000000 !important;
+    }}
+    
+    /* Cards and specific elements */
     .movie-card {{
         background: {card_bg};
-        border-radius: 10px;
+        border-radius: 12px;
         padding: 1rem;
         margin: 0.5rem 0;
-        border-left: 4px solid {hero_color};
+        border: 1px solid {border_color};
     }}
-    .movie-title {{ color: #000000; font-size: 1.2rem; font-weight: bold; margin-bottom: 0.5rem; }}
-    .movie-info {{ color: #000000; font-size: 0.9rem; margin: 0.3rem 0; }}
+    .movie-title {{ color: {text_main}; font-size: 1.1rem; font-weight: 600; margin-bottom: 0.25rem; }}
+    .movie-info {{ color: {text_muted}; font-size: 0.9rem; margin: 0.2rem 0; }}
     .movie-genre {{
-        background: rgba(37, 211, 102, 0.2);
-        color: #000000;
+        background: #303234;
+        color: {text_main};
         padding: 0.2rem 0.6rem;
         border-radius: 12px;
         font-size: 0.8rem;
         margin-right: 0.3rem;
         display: inline-block;
-        margin-top: 0.3rem;
+        margin-top: 0.5rem;
     }}
     
     .stat-box {{
         background: {card_bg};
-        border-radius: 10px;
+        border-radius: 12px;
         padding: 1.5rem;
         text-align: center;
         border: 1px solid {border_color};
     }}
-    .stat-number {{ font-size: 2.5rem; color: {hero_color}; font-weight: bold; }}
+    .stat-number {{ font-size: 2rem; color: {text_main}; font-weight: 600; }}
     .stat-label {{ font-size: 0.9rem; color: {text_muted} !important; }}
-    .info-box {{ background: {card_bg}; border-left: 4px solid {hero_color}; border-radius: 8px; padding: 1rem; color: {text_muted} !important; }}
+    .info-box {{ background: {card_bg}; border: 1px solid {border_color}; border-radius: 12px; padding: 1.5rem; color: {text_muted} !important; text-align: center; }}
+    
+    /* Override markdown p spacing */
+    .assistant-message p {{ margin-bottom: 0.75rem; }}
+    
+    /* Input Container layout hack to make it look cohesive */
+    [data-testid="stForm"] {{
+        background: #202222;
+        border: 1px solid #303234;
+        border-radius: 16px;
+        padding: 0.5rem 1rem 1rem 1rem;
+        display: flex;
+        flex-direction: column;
+    }}
+    [data-testid="stForm"] .stTextInput > div > div > input {{
+        background: transparent !important;
+        border: none !important;
+        padding: 0.8rem 0rem 0.5rem 0rem !important;
+        font-size: 1.1rem;
+        font-weight: 400;
+    }}
+    [data-testid="stForm"] .stTextInput > div > div > input::placeholder {{
+        color: #808080;
+    }}
+    
+    .input-bottom-row {{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.5rem;
+    }}
+    
+    .input-action-btn {{
+        background: transparent;
+        border: 1px solid #404040;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        color: #A0A0A0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        padding: 0;
+    }}
+    
+    .input-tools {{
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        color: #A0A0A0;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }}
+    /* Form submit button alignment override */
+    [data-testid="stForm"] .stButton > button {{
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        z-index: 10;
+        margin: 0;
+        background: #FFFFFF;
+        color: #000000 !important;
+        border-radius: 50%;
+        border: none;
+        width: 36px !important;
+        height: 36px !important;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        transition: opacity 0.2s;
+    }}
+    
+    /* Mic button alignment override: moves the external mic element inside the form visually */
+    .external-mic {{
+        position: absolute;
+        bottom: 85px; /* Adjust depending on form height relative to page */
+        right: 80px;
+        z-index: 999;
+    }}
+    
+    /* Make the mic component button look clean */
+    .external-mic > div > button {{
+        background: transparent;
+        border: none;
+        color: #A0A0A0;
+        cursor: pointer;
+        padding: 5px;
+    }}
+    .external-mic > div > button:hover {{ color: #FFFFFF; background: transparent !important; }}
     </style>
     """, unsafe_allow_html=True)
 def load_lottie_url(url: str):
@@ -536,10 +601,8 @@ def main():
     # Inject CSS based on theme
     inject_custom_css(st.session_state.theme)
     
-    # Hero Section
-    st.markdown('<h1 class="hero-title">AI Movie Recommender</h1>', unsafe_allow_html=True)
-    st.markdown('<p class="hero-tagline">Your AI-powered movie discovery assistant 🎬</p>', unsafe_allow_html=True)
-    st.markdown('<div class="netflix-divider"></div>', unsafe_allow_html=True)
+    # Hero Section - Perplexity Style Logo
+    st.markdown('<h1 class="hero-title" style="font-family: \'Satoshi\', sans-serif; letter-spacing: -0.05em;">AI Movie Recommender</h1>', unsafe_allow_html=True)
     
     # Initialize RAG system
     if not st.session_state.system_initialized:
@@ -549,7 +612,6 @@ def main():
     # Example queries section removed
     
     # Chat container
-    st.markdown("### 💬 Conversation")
     
     chat_container = st.container()
     
@@ -602,48 +664,58 @@ def main():
             
             #st.markdown('</div>', unsafe_allow_html=True)
         else:
-            st.markdown('''
-            <div class="info-box">
-                <p>👋 Welcome to Movie Recommender! I'm here to help you discover amazing movies and shows.</p>
-                <p>💡 Ask me anything about movies - recommendations, comparisons, or specific genres!</p>
-            </div>
-            ''', unsafe_allow_html=True)
+            pass # Removed welcome message to match Perplexity's minimal UI
     
     # Input section
     st.markdown('<div class="netflix-divider"></div>', unsafe_allow_html=True)
     
-    # Place mic recorder outside the form so its React state doesn't wipe on submit
-    col_mic1, col_mic2 = st.columns([5, 1])
-    with col_mic2:
-        audio_info = mic_recorder(
-            start_prompt="🎙️ Voice",
-            stop_prompt="⏹️ Stop",
-            key='mic_recorder',
-            format="wav",
-            just_once=True,
-            use_container_width=True
-        )
-        
+    audio_info = None
+    
+    # Place mic component first, but visually pull it down via CSS
+    st.markdown('<div class="external-mic">', unsafe_allow_html=True)
+    audio_info = mic_recorder(
+        start_prompt="🎙️",
+        stop_prompt="⏹️",
+        key='mic_recorder',
+        format="wav",
+        just_once=True,
+    )
+    st.markdown('</div>', unsafe_allow_html=True)
+    
     if audio_info and 'bytes' in audio_info:
         with st.spinner("Transcribing..."):
             text = transcribe_audio(audio_info['bytes'])
             if text:
                 st.session_state.current_input = text
-                
+
     with st.form("chat_form", clear_on_submit=False):
-        col1, col2 = st.columns([5, 1])
+        user_input = st.text_input(
+            "Ask anything...",
+            value=st.session_state.current_input,
+            placeholder="Ask anything...",
+            key="user_query_input",
+            label_visibility="collapsed"
+        )
         
-        with col1:
-            user_input = st.text_input(
-                "Ask me anything about movies...",
-                value=st.session_state.current_input,
-                placeholder="E.g., Recommend action movies with great plots...",
-                key="user_query_input",
-                label_visibility="collapsed"
-            )
+        # Bottom row of the input field
+        st.markdown('''
+            <div class="input-bottom-row">
+                <div class="input-action-btn">+</div>
+                <div class="input-tools">
+                    <span style="display: flex; align-items: center; gap: 4px; cursor: pointer;">Model <span style="font-size: 0.7em;">▼</span></span>
+                    <span style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                        Computer
+                    </span>
+                    <!-- Spacers for absolute positioned CSS elements -->
+                    <span style="width: 40px; display: inline-block;"></span>
+                    <span style="width: 40px; display: inline-block;"></span>
+                </div>
+            </div>
+        ''', unsafe_allow_html=True)
         
-        with col2:
-            send_button = st.form_submit_button("🚀 Send", use_container_width=True)
+        # We use an arrow icon representing the send action
+        send_button = st.form_submit_button("→", use_container_width=False)
             
     # Process query
     if send_button and user_input:
@@ -700,12 +772,12 @@ def main():
     
     # Footer
     st.markdown('<div class="netflix-divider" style="margin-top: 3rem;"></div>', unsafe_allow_html=True)
-    st.markdown('''
-    <div style="text-align: center; color: #808080; padding: 2rem 0;">
-        <p>Powered by Group 14 - The Peter Pan Posse</p>
-        <p style="font-size: 0.8rem;">Nikhil Gajula • Radhey Mutha • Muneeb Ahmed</p>
-    </div>
-    ''', unsafe_allow_html=True)
+    # st.markdown('''
+    # <div style="text-align: center; color: #808080; padding: 2rem 0;">
+    #     <p>Powered by Group 14 - The Peter Pan Posse</p>
+    #     <p style="font-size: 0.8rem;">Nikhil Gajula • Radhey Mutha • Muneeb Ahmed</p>
+    # </div>
+    # ''', unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()

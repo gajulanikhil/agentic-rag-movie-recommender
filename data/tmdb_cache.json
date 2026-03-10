@@ -523,5 +523,45 @@
     "overview": "An Interpol-issued Red Notice is a global alert to hunt and capture the world's most wanted. But when a daring heist brings together the FBI's top profiler and two rival criminals, there's no telling what will happen.",
     "vote_average": 6.742,
     "popularity": 5.7616
+  },
+  "The Dark Knight_2008": {
+    "poster_url": "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
+    "backdrop_url": "https://image.tmdb.org/t/p/w780/dqK9Hag1054tghRQSqLSfrkvQnA.jpg",
+    "tmdb_id": 155,
+    "title": "The Dark Knight",
+    "year": "2008",
+    "overview": "Batman raises the stakes in his war on crime. With the help of Lt. Jim Gordon and District Attorney Harvey Dent, Batman sets out to dismantle the remaining criminal organizations that plague the streets. The partnership proves to be effective, but they soon find themselves prey to a reign of chaos unleashed by a rising criminal mastermind known to the terrified citizens of Gotham as the Joker.",
+    "vote_average": 8.527,
+    "popularity": 33.3577
+  },
+  "The Grand Budapest Hotel_2014": {
+    "poster_url": "https://image.tmdb.org/t/p/w500/eWdyYQreja6JGCzqHWXpWHDrrPo.jpg",
+    "backdrop_url": "https://image.tmdb.org/t/p/w780/9udCLTxTFl28RxnK8Q05E154ZGa.jpg",
+    "tmdb_id": 120467,
+    "title": "The Grand Budapest Hotel",
+    "year": "2014",
+    "overview": "The Grand Budapest Hotel tells of a legendary concierge at a famous European hotel between the wars and his friendship with a young employee who becomes his trusted prot\u00e9g\u00e9. The story involves the theft and recovery of a priceless Renaissance painting, the battle for an enormous family fortune and the slow and then sudden upheavals that transformed Europe during the first half of the 20th century.",
+    "vote_average": 8.0,
+    "popularity": 10.5815
+  },
+  "Mad Max: Fury Road_2015": {
+    "poster_url": "https://image.tmdb.org/t/p/w500/hA2ple9q4qnwxp3hKVNhroipsir.jpg",
+    "backdrop_url": "https://image.tmdb.org/t/p/w780/l0eIS009XtEO80aC6zjM3o3AkEl.jpg",
+    "tmdb_id": 76341,
+    "title": "Mad Max: Fury Road",
+    "year": "2015",
+    "overview": "An apocalyptic story set in the furthest reaches of our planet, in a stark desert landscape where humanity is broken, and most everyone is crazed fighting for the necessities of life. Within this world exist two rebels on the run who just might be able to restore order.",
+    "vote_average": 7.63,
+    "popularity": 14.4356
+  },
+  "Inception_2010": {
+    "poster_url": "https://image.tmdb.org/t/p/w500/xlaY2zyzMfkhk0HSC5VUwzoZPU1.jpg",
+    "backdrop_url": "https://image.tmdb.org/t/p/w780/8ZTVqvKDQ8emSGUEMjsS4yHAwrp.jpg",
+    "tmdb_id": 27205,
+    "title": "Inception",
+    "year": "2010",
+    "overview": "Cobb, a skilled thief who commits corporate espionage by infiltrating the subconscious of his targets is offered a chance to regain his old life as payment for a task considered to be impossible: \"inception\", the implantation of another person's idea into a target's subconscious.",
+    "vote_average": 8.371,
+    "popularity": 31.6884
   }
 }
