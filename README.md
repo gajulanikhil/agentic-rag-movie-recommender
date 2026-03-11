@@ -11,6 +11,24 @@ This project bridges a sleek **Next.js frontend** with a robust **FastAPI Python
 
 ---
 
+## 🎯 Overview
+
+**Agentic RAG Movie Recommender** is an advanced movie recommendation system that combines the power of Large Language Models (LLMs) with semantic search capabilities to provide intelligent, context-aware movie suggestions. Unlike traditional recommendation systems that rely solely on user ratings or collaborative filtering, this agent considers natural language queries, maintains conversation context, and validates real-time streaming availability using concurrent network requests.
+
+### What Makes It Special?
+- 🧠 **Context-Aware Conversations**: Remembers previous interactions to allow for organic, multi-turn follow-up questions.
+- 🚀 **Asynchronous Validation**: Concurrent threading dynamically checks TMDB for live ratings and streaming provider availability, dropping invalid movies before they reach the LLM's context window. 
+- 💬 **Semantic Search**: Finds movies based on plot meaning and vibe, not just title keywords.
+- 🎨 **Premium UI**: Netflix-inspired dark theme built in Next.js with glassmorphic elements and interactive cast accordions.
+- 🔒 **100% Free LLM**: No paid API barriers; the natural language generation runs entirely on your local machine using Ollama.
+
+### Use Cases
+- **Vibe-based Discovery**: Find hidden gems based on mood, specific genres, or complex plot themes (e.g., "mind-bending sci-fi with a twist ending").
+- **Availability Filtering**: "What are some highly-rated comedies actually available on Netflix right now?"
+- **Conversational Exploration**: Discover movies through natural dialogue ("Tell me more about the second one" or "Show me something older").
+
+---
+
 ## ✨ Features
 
 - **💡 Semantic Search RAG:** Instead of exact keyword matching, the system understands the *vibe* and *meaning* of your request using Sentence Transformers.
@@ -46,13 +64,94 @@ graph TD
     API -->|Response JSON| UI
 ```
 
-### Tech Stack
-- **Frontend:** Next.js (React 18), Vanilla CSS Modules, React Markdown
-- **Backend Core:** FastAPI, Uvicorn, Python 3.9+
-- **AI Framework:** LangChain (Chains & Prompts)
-- **Local Large Language Model:** Ollama (Llama 3.2)
-- **Vector Database:** ChromaDB (Local Persisted)
-- **Third-Party APIs:** TMDB (The Movie Database)
+### 🛠️ Technology Stack
+
+#### Frontend Layer
+- **Next.js (React 18)**: The foundational React framework for building our highly responsive, modern, and SEO-friendly user interface.
+- **Vanilla CSS Modules**: Scoped stylesheet isolation ensuring the premium Netflix-esque Glassmorphic visual aesthetic remains contained and responsive.
+- **React Markdown**: Renders the AI's plain-text markdown responses into parsed HTML with formatting, bolding, and lists.
+
+#### API & Backend Layer
+- **FastAPI**: A modern, high-performance web framework for building APIs with Python. It serves as the bridge accepting requests from Next.js and orchestrating the AI logic.
+- **Uvicorn**: An ASGI web server implementation for Python, providing lightning-fast async request handling for FastAPI.
+
+#### Artificial Intelligence Core
+- **LangChain**: A framework for developing applications powered by language models. It manages our prompt templating, conversational memory buffers, and chain orchestration.
+- **Ollama (Llama 3.2)**: A local LLM runtime environment. We use Meta's efficient Llama 3.2 model to process context and generate human-like, conversational recommendations without paying for cloud API credits.
+- **Sentence Transformers (`all-MiniLM-L6-v2`)**: A lightweight embedding model that mathematically represents the meaning of text, converting user prompts into dense vectors for fast database similarity searches.
+
+#### Data & External Services
+- **ChromaDB**: An open-source, local vector database. It permanently stores the mathematical embeddings of our movie library allowing for rapid semantic similarity lookups.
+- **TMDB API**: The Movie Database API. We query this service concurrently during the generative process to pull live streaming data, real-time ratings, movie posters, and cast/crew billing.
+
+---
+
+### RAG Pipeline Flow
+
+```text
+User Query: "Find me a dark thriller on Netflix from the 2010s"
+                            │
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│ Step 1: Query Enhancement & Parsing                    │
+│ - Validate user frontend filters (Genre, Netflix, etc.)│
+│ - Retrieve last 5 turns of conversation memory         │
+│ Output: Local context dictionary                       │
+└────────────────┬───────────────────────────────────────┘
+                 │
+                 ▼
+┌────────────────────────────────────────────────────────┐
+│ Step 2: Vector Retrieval (ChromaDB)                    │
+│ - Convert user prompt to 384-dim semantic vector       │
+│ - Pre-filter metadata (Year >= 2010, Year <= 2019)     │
+│ - Retrieve Top-15 most semantically similar movie plots│
+└────────────────┬───────────────────────────────────────┘
+                 │
+                 ▼
+┌────────────────────────────────────────────────────────┐
+│ Step 3: Concurrent Post-Retrieval Validation           │
+│ - Spin up ThreadPoolExecutor for 15 concurrent tasks   │
+│ - Ping TMDB API `/search/movie` & `/watch/providers`   │
+│ - Drop any movie NOT available on Netflix              │
+│ Output: Top-K strictly verified candidate movies       │
+└────────────────┬───────────────────────────────────────┘
+                 │
+                 ▼
+┌────────────────────────────────────────────────────────┐
+│ Step 4: Context Assembly                               │
+│ - Format the surviving documents into a clear string   │
+│ - Inject system instructions, memory, and context      │
+│ Output: Master Prompt for the LLM                      │
+└────────────────┬───────────────────────────────────────┘
+                 │
+                 ▼
+┌────────────────────────────────────────────────────────┐
+│ Step 5: LLM Generation (Ollama Llama 3.2)              │
+│ - Process the Master Prompt locally                    │
+│ - Generate a natural language response dynamically     │
+│ Output: "I recommend 'Prisoners' (2013) because..."    │
+└────────────────┬───────────────────────────────────────┘
+                 │
+                 ▼
+┌────────────────────────────────────────────────────────┐
+│ Step 6: Visual Metadata Enrichment                     │
+│ - Spin up ThreadPoolExecutor over final LLM selections │
+│ - Fetch high-res TMDB poster URLs                      │
+│ - Fetch TMDB Top 5 Cast billing                        │
+│ Output: Final JSON payload containing markdown & UI    │
+└────────────────────────────────────────────────────────┘
+```
+
+### Data Flow Diagram
+
+```text
+Raw Data → Processing → Vector Store → Search → Concurrency → AI Generation
+   │           │             │            │           │             │
+   ▼           ▼             ▼            ▼           ▼             ▼
+ Kaggle     Pandas        ChromaDB    Semantic   ThreadPool      Ollama 
+ Datasets   Merging       Embeddings  Distance   Validation      Llama 3.2
+ (CSV)      Cleaning      (Local)     Sorting    (TMDB API)      (Local)
+```
 
 ---
 
