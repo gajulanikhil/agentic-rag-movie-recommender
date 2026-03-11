@@ -1,0 +1,49 @@
+{
+  "response": "Hello there, movie lover! I'm thrilled to help you find a hilarious movie to watch!\n\nI understand you're looking for a comedy film from the past 75 years, with a rating above 0.0, and currently available on a streaming platform. I've got just the thing!\n\nHere are three funny movie recommendations that match your criteria:\n\n\u2022 The Hangover (2009) - A wild and crazy night in Vegas leads to a missing friend and a whole lot of laughs!\n\u2022 Superbad (2007) - A coming-of-age comedy about two high school friends trying to score booze for a party.\n\u2022 Bridesmaids (2011) - A hilarious and heartwarming story about a group of bridesmaids clashing as they prepare for their friend's wedding.\n\nHope you find something that tickles your funny bone!\n\n**Sources:**\n\u2022 The Hangover (2009)\n\u2022 Superbad (2007)\n\u2022 Bridesmaids (2011)",
+  "error": null,
+  "sources": [
+    {
+      "title": "The Hangover",
+      "year": "2009",
+      "genres": [],
+      "similarity_score": 0.99,
+      "poster_path": "https://image.tmdb.org/t/p/w500/A0uS9rHR56FeBtpjVki16M5xxSW.jpg",
+      "overview": "When three friends finally come to after a raucous night of bachelor-party revelry, they find a baby in the closet and a tiger in the bathroom. But they can't seem to locate their best friend, Doug \u2013 who's supposed to be tying the knot. Launching a frantic search for Doug, the trio perseveres through a nasty hangover to try to make it to the church on time.",
+      "rating": 7.3,
+      "providers": [
+        "fuboTV",
+        "YouTube TV"
+      ]
+    },
+    {
+      "title": "Superbad",
+      "year": "2007",
+      "genres": [],
+      "similarity_score": 0.99,
+      "poster_path": "https://image.tmdb.org/t/p/w500/ek8e8txUyUwd2BNqj6lFEerJfbq.jpg",
+      "overview": "Two co-dependent high school seniors are forced to deal with separation anxiety after their plan to stage a booze-soaked party goes awry.",
+      "rating": 7.3,
+      "providers": [
+        "Amazon Prime Video",
+        "YouTube TV",
+        "Amazon Prime Video with Ads"
+      ]
+    },
+    {
+      "title": "Bridesmaids",
+      "year": "2011",
+      "genres": [],
+      "similarity_score": 0.99,
+      "poster_path": "https://image.tmdb.org/t/p/w500/gJtA7hYsBMQ7EM3sPBMUdBfU7a0.jpg",
+      "overview": "Annie's life is a mess. But when she finds out her lifetime best friend is engaged, she simply must serve as Lillian's maid of honor. Though lovelorn and broke, Annie bluffs her way through the expensive and bizarre rituals. With one chance to get it perfect, she\u2019ll show Lillian and her bridesmaids just how far you\u2019ll go for someone you love.",
+      "rating": 6.5,
+      "providers": [
+        "Starz Apple TV Channel",
+        "Starz Roku Premium Channel",
+        "Starz",
+        "Philo",
+        "Starz Amazon Channel"
+      ]
+    }
+  ]
+}

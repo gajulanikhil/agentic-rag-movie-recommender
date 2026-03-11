@@ -1,10 +1,11 @@
 """
-RAG Chain for Netflix GPT
+RAG Chain for Movie Recommender
 Combines retrieval + LLM generation for movie recommendations
 """
 
 from typing import List, Dict, Any, Optional
 import json
+import requests
 from datetime import datetime
 from conversation_memory import ConversationMemory
 
@@ -37,7 +38,7 @@ class NetflixGPTRAG:
         vector_store: MovieVectorStore = None,
         model_name: str = "llama3.2",
         temperature: float = 0.7,
-        top_k_retrieval: int = 5
+        top_k_retrieval: int = 15
     ):
         """
         Initialize RAG chain
@@ -84,7 +85,7 @@ class NetflixGPTRAG:
     def _create_prompt_template(self) -> PromptTemplate:
         """Create the prompt template for the LLM"""
         
-        template = """You are Netflix GPT, an expert movie recommendation assistant. You help users discover movies based on their preferences.
+        template = """You are Movie Recommender, an expert movie recommendation assistant. You help users discover movies based on their preferences.
 
 You have access to a movie database with detailed information. Use the context below to provide accurate, helpful recommendations.
 
@@ -94,12 +95,23 @@ CONTEXT FROM MOVIE DATABASE:
 USER QUESTION: {question}
 
 INSTRUCTIONS:
-1. Provide specific movie recommendations based on the context
-2. Include movie titles, release years, and brief descriptions
-3. Explain WHY each movie matches the user's request
-4. If the context doesn't have perfect matches, recommend the closest alternatives
-5. Be conversational and enthusiastic about movies
-6. Always mention which movies from the database you're referring to
+1. IF the user asks for movie recommendations:
+   - CRITICAL FILTER COMPLIANCE: You will see a `[Filters: ...]` block in the User Question. You MUST strictly adhere to these criteria:
+     * ONLY recommend movies matching the specified Genre (if not 'All').
+     * ONLY recommend movies released within the specified Year range.
+     * ONLY recommend movies with a quality score exceeding the Min Rating.
+     * ONLY recommend the specified Content Type (Movies vs TV Shows).
+     * If 'Streaming On' is specified (not 'All'), you MUST ONLY recommend movies currently available on that exact platform.
+     * NEVER mention the `self-correction`, `[Filters: ...]`, or your filtering process in your response. Act naturally.
+   - Return the exact number of movies requested by the user. If not specified, return 3.
+   - Use this EXACT format for each movie:
+     • Movie Title (Year) - One sentence why it matches.
+2. IF the user asks for details about a specific movie:
+   - Provide an engaging, descriptive paragraph about that movie.
+   - At the very end of your response, on a new line, you MUST append the movie title and year in this EXACT format: "• Movie Title (Year) - "
+   - Do NOT output a list of recommendations.
+3. Keep the total response under 250 words.
+4. No long descriptions or explanations. Be direct and concise.
 
 RESPONSE:"""
         
@@ -125,11 +137,15 @@ RESPONSE:"""
         """
         print(f"🔍 Retrieving documents for: '{query}'")
         
-        # Search vector store
+        # Increase candidate pool wildly if filters require post-retrieval dropping
+        # This prevents generic queries from returning 0 results due to top semantic matches missing the filter
+        search_k = 500 if filters else self.top_k
+        
+        # Search vector store (pass None to avoid crashing ChromaDB on unsupported keys)
         results = self.vector_store.search(
             query=query,
-            n_results=self.top_k,
-            filter_metadata=filters
+            n_results=search_k,
+            filter_metadata=None
         )
         
         # Format results
@@ -139,18 +155,114 @@ RESPONSE:"""
             results['metadatas'][0],
             results['distances'][0]
         ):
-            retrieved_docs.append({
-                'content': doc,
-                'metadata': metadata,
-                'similarity_score': 1 - distance  # Convert distance to similarity
-            })
+            # Exclude backend system collections from being passed to the RAG model or frontend
+            if 'Collection' not in str(metadata.get('title', '')):
+                retrieved_docs.append({
+                    'content': doc,
+                    'metadata': metadata,
+                    'similarity_score': 1 - distance  # Convert distance to similarity
+                })
         
+        # Execute rigorous post-retrieval filtering in Python
+        if filters:
+            retrieved_docs = self._apply_post_retrieval_filters(retrieved_docs, filters)
+            # Re-truncate to original requested size
+            retrieved_docs = retrieved_docs[:self.top_k]
+                
         print(f"✅ Retrieved {len(retrieved_docs)} relevant documents")
         
         return {
             'documents': retrieved_docs,
             'query': query
         }
+        
+    def _apply_post_retrieval_filters(self, docs: List[Dict], filters: Dict) -> List[Dict]:
+        """Manually filter vector documents using exact metadata criteria and live TMDB streaming data concurrently."""
+        import os
+        import concurrent.futures
+        import requests
+        from dotenv import load_dotenv, find_dotenv
+        
+        load_dotenv(find_dotenv())
+        TMDB_API_KEY = os.getenv("TMDB_API_KEY")
+        
+        req_provider = filters.get('provider', 'All')
+        min_rating = filters.get('min_rating', 0.0)
+        
+        def _check_doc(doc):
+            metadata = doc.get('metadata', {})
+            
+            # 1. Year Filter
+            doc_year = metadata.get('year', 0)
+            if filters.get('min_year') and doc_year < filters['min_year']:
+                return None
+            if filters.get('max_year') and doc_year > filters['max_year']:
+                return None
+                
+            # 2. Genre Filter
+            req_genre = filters.get('genre', 'All')
+            if req_genre != 'All':
+                doc_genres = metadata.get('genres', '')
+                if isinstance(doc_genres, str):
+                    if req_genre.lower() not in doc_genres.lower():
+                        return None
+                elif isinstance(doc_genres, list):
+                    if not any(req_genre.lower() in g.lower() for g in doc_genres):
+                        return None
+            
+            # 3. Content Type Filter
+            req_type = filters.get('content_type', 'All')
+            if req_type == 'TV Shows' and 'movie' in str(metadata.get('type', 'Movies')).lower():
+                pass # Skipping enforcement since DB is exclusively movies
+            
+            # 4. TMDB Live Metadata Filter (Provider & Rating)
+            if (req_provider != 'All' or min_rating > 0.0) and TMDB_API_KEY:
+                title = metadata.get('title')
+                if not title or title == 'Unknown':
+                    return None
+                try:
+                    # Search TMDB for movie ID and rating
+                    tmdb_url = f"https://api.themoviedb.org/3/search/movie?api_key={TMDB_API_KEY}&query={title}"
+                    res = requests.get(tmdb_url, timeout=2).json()
+                    results = res.get('results', [])
+                    if not results:
+                        return None
+                    
+                    # Enforce Rating
+                    if min_rating > 0.0:
+                        tmdb_rating = results[0].get('vote_average', 0.0)
+                        if tmdb_rating < min_rating:
+                            return None # Drop Document
+                    
+                    # Enforce Provider
+                    if req_provider != 'All':
+                        movie_id = results[0]['id']
+                        prov_url = f"https://api.themoviedb.org/3/movie/{movie_id}/watch/providers?api_key={TMDB_API_KEY}"
+                        prov_data = requests.get(prov_url, timeout=2).json()
+                        flatrate = prov_data.get('results', {}).get('US', {}).get('flatrate', [])
+                        
+                        found_provider = False
+                        for p in flatrate:
+                            if req_provider.lower() in p.get('provider_name', '').lower() or \
+                               ('apple' in req_provider.lower() and 'apple' in p.get('provider_name', '').lower()) or \
+                               ('prime' in req_provider.lower() and 'prime' in p.get('provider_name', '').lower()):
+                                found_provider = True
+                                break
+                                
+                        if not found_provider:
+                            return None # Drop Document
+                except Exception:
+                    return None # Drop Document if TMDB crashes during strict filtering
+            
+            return doc
+
+        # Execute TMDB network requests for all candidate documents in parallel
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            verified_docs = list(executor.map(_check_doc, docs))
+            
+        # Strip failed payloads and cap limit natively
+        filtered_docs = [d for d in verified_docs if d is not None]
+        return filtered_docs[:self.top_k]
     
     def format_context(self, retrieved_docs: List[Dict]) -> str:
         """
@@ -259,16 +371,54 @@ RESPONSE:"""
             'timestamp': datetime.now().isoformat()
         }
         
+        import re
         if return_sources:
-            # Add source information
-            sources = []
-            for doc in retrieved_docs:
-                sources.append({
-                    'title': doc['metadata'].get('title', 'Unknown'),
-                    'year': doc['metadata'].get('year', 'N/A'),
-                    'genres': doc['metadata'].get('genres', []),
-                    'similarity_score': doc['similarity_score']
-                })
+            # Extract explicitly generated movies from the response text
+            mentioned_movies = []
+            seen_titles = set()
+            for line in answer.split('\n'):
+                match = re.search(r'(.*?)\((\d{4})\)', line)
+                if match:
+                    raw_title = match.group(1)
+                    year = match.group(2)
+                    clean_title = re.sub(r'^[\s\d\.\-\*•]+', '', raw_title.replace('**', '').replace('*', '')).strip()
+                    if clean_title and clean_title.lower() not in seen_titles:
+                        mentioned_movies.append((clean_title, year))
+                        seen_titles.add(clean_title.lower())
+            
+            doc_lookup = {
+                str(doc['metadata'].get('title', '')).lower(): doc
+                for doc in retrieved_docs
+            }
+            
+            for (movie_title, movie_year) in mentioned_movies:
+                clean_title = movie_title.strip()
+                match = doc_lookup.get(clean_title.lower())
+                if match:
+                    sources.append({
+                        'title': match['metadata'].get('title', clean_title),
+                        'year': match['metadata'].get('year', movie_year),
+                        'genres': match['metadata'].get('genres', []),
+                        'similarity_score': match['similarity_score']
+                    })
+                else:
+                    sources.append({
+                        'title': clean_title,
+                        'year': movie_year,
+                        'genres': [],
+                        'similarity_score': 0.99
+                    })
+            
+            if not sources:
+                # Limit fallback UI cards
+                fallback_limit = 3
+                for doc in retrieved_docs[:fallback_limit]:
+                    sources.append({
+                        'title': doc['metadata'].get('title', 'Unknown'),
+                        'year': doc['metadata'].get('year', 'N/A'),
+                        'genres': doc['metadata'].get('genres', []),
+                        'similarity_score': doc['similarity_score']
+                    })
             response['sources'] = sources
         
         print("\n✅ Response generated")
@@ -302,8 +452,8 @@ class NetflixGPTWithMemory(NetflixGPTRAG):
         self,
         vector_store: MovieVectorStore = None,
         model_name: str = "llama3.2",
-        temperature: float = 0.7,
-        top_k_retrieval: int = 5,
+        temperature: float = 0.4,
+        top_k_retrieval: int = 15,
         max_memory_turns: int = 5,
         session_id: str = None
     ):
@@ -337,7 +487,7 @@ class NetflixGPTWithMemory(NetflixGPTRAG):
     def _create_memory_aware_prompt_template(self) -> PromptTemplate:
         """Create prompt template that includes conversation history"""
         
-        template = """You are Netflix GPT, an expert movie recommendation assistant with memory of the conversation.
+        template = """You are Movie Recommender, an expert movie recommendation assistant.
 
 CONVERSATION HISTORY:
 {conversation_history}
@@ -347,14 +497,26 @@ MOVIE DATABASE CONTEXT:
 
 CURRENT USER QUESTION: {question}
 
-INSTRUCTIONS:
-1. Use the conversation history to understand context and follow-up questions
-2. Avoid recommending movies already discussed (unless specifically requested)
-3. Consider user preferences mentioned earlier in the conversation
-4. Provide specific recommendations with titles, years, and descriptions
-5. Explain WHY each movie matches the request
-6. Be conversational and reference previous parts of the discussion naturally
-7. If the user asks about "that movie" or "it", refer to the conversation history
+Instructions:
+Start with enthusiasm and a greeting.
+1. Use conversation history to understand the request.
+2. IF the user asks for movie recommendations:
+   - CRITICAL FILTER COMPLIANCE: You will see a `[Filters: ...]` block in the User Question. You MUST strictly adhere to these criteria:
+     * ONLY recommend movies matching the specified Genre (if not 'All').
+     * ONLY recommend movies released within the specified Year range.
+     * ONLY recommend movies with a quality score exceeding the Min Rating.
+     * ONLY recommend the specified Content Type (Movies vs TV Shows).
+     * If 'Streaming On' is specified (not 'All'), you MUST ONLY recommend movies currently available on that exact platform.
+     * NEVER mention the `[Filters: ...]` block or your filtering process in your response. Act naturally as if you simply know these preferences.
+   - Do not recommend movies already mentioned unless asked.
+   - Respect user preferences.
+   - Return the EXACT number of movies requested by the user. If not specified, return 3.
+   - Format STRICTLY as a vertical list, one movie per item.
+3. IF the user asks for details about a specific movie:
+   - Provide an engaging, descriptive paragraph about that movie.
+   - At the very end of your response, on a new line, you MUST append the movie title and year in this EXACT format: "• Movie Title (Year) - "
+   - Do NOT output a list of recommendations.
+4. Keep the entire response **under 250 words**.
 
 USER PREFERENCES DETECTED:
 {preferences}
@@ -446,15 +608,123 @@ RESPONSE:"""
             'timestamp': datetime.now().isoformat()
         }
         
+        import re
         if return_sources:
             sources = []
-            for doc in retrieved_docs:
-                sources.append({
-                    'title': doc['metadata'].get('title', 'Unknown'),
-                    'year': doc['metadata'].get('year', 'N/A'),
-                    'genres': doc['metadata'].get('genres', []),
-                    'similarity_score': doc['similarity_score']
-                })
+            
+            # Extract explicitly generated movies from the response text
+            # Robust line-by-line parser targeting the year anchor (YYYY)
+            mentioned_movies = []
+            seen_titles = set()
+            for line in response_text.split('\n'):
+                match = re.search(r'(.*?)\((\d{4})\)', line)
+                if match:
+                    raw_title = match.group(1)
+                    year = match.group(2)
+                    clean_title = re.sub(r'^[\s\d\.\-\*•]+', '', raw_title.replace('**', '').replace('*', '')).strip()
+                    if clean_title and clean_title.lower() not in seen_titles:
+                        mentioned_movies.append((clean_title, year))
+                        seen_titles.add(clean_title.lower())
+            
+            # Use retrieved docs metadata for baseline reference
+            # map by title lowering
+            doc_lookup = {
+                str(doc['metadata'].get('title', '')).lower(): doc
+                for doc in retrieved_docs
+            }
+            
+            for (movie_title, movie_year) in mentioned_movies:
+                # Get similarity score from baseline doc, if it exists
+                clean_title = movie_title.strip()
+                match = doc_lookup.get(clean_title.lower())
+                
+                if match:
+                    sources.append({
+                        'title': match['metadata'].get('title', clean_title),
+                        'year': match['metadata'].get('year', movie_year),
+                        'genres': match['metadata'].get('genres', []),
+                        'similarity_score': match['similarity_score']
+                    })
+                else:
+                    sources.append({
+                        'title': clean_title,
+                        'year': movie_year,
+                        'genres': [],
+                        'similarity_score': 0.99  # LLM synthesized it directly
+                    })
+            
+            # If regex extraction fails or LLM formats badly, fallback to the original retrieve
+            if not sources and retrieved_docs:
+                # If conversational follow-up, only show the single most relevant movie card
+                limit = 1 if is_followup else len(retrieved_docs)
+                for doc in retrieved_docs[:limit]:
+                    sources.append({
+                        'title': doc['metadata'].get('title', 'Unknown'),
+                        'year': doc['metadata'].get('year', 'N/A'),
+                        'genres': doc['metadata'].get('genres', []),
+                        'similarity_score': doc.get('similarity_score', 0.99)
+                    })
+            
+            # Enrich sources with TMDB metadata for Next.js Frontend concurrently
+            import os
+            import time
+            import concurrent.futures
+            from dotenv import load_dotenv, find_dotenv
+            
+            load_dotenv(find_dotenv())
+            TMDB_API_KEY = os.getenv("TMDB_API_KEY") # Use valid key from .env file
+            
+            def enrich_single_source(source):
+                if not TMDB_API_KEY:
+                    return source
+                title = source.get('title')
+                if not title or title == 'Unknown':
+                    return source
+                
+                try:
+                    tmdb_url = f"https://api.themoviedb.org/3/search/movie?api_key={TMDB_API_KEY}&query={title}"
+                    tmdb_res = requests.get(tmdb_url, timeout=5).json()
+                    if tmdb_res.get('results') and len(tmdb_res['results']) > 0:
+                        top_hit = tmdb_res['results'][0]
+                        if top_hit.get('poster_path'):
+                            source['poster_path'] = f"https://image.tmdb.org/t/p/w500{top_hit['poster_path']}"
+                        source['overview'] = top_hit.get('overview', "A recommended movie.")
+                        source['rating'] = round(top_hit.get('vote_average', 0.0), 1)
+                        
+                        movie_id = top_hit.get('id')
+                        source['providers'] = []
+                        source['cast'] = []
+                        
+                        if movie_id:
+                            prov_url = f"https://api.themoviedb.org/3/movie/{movie_id}/watch/providers?api_key={TMDB_API_KEY}"
+                            try:
+                                prov_res = requests.get(prov_url, timeout=5).json()
+                                us_data = prov_res.get('results', {}).get('US', {})
+                                flatrate = us_data.get('flatrate', [])
+                                source['providers'] = [p['provider_name'] for p in flatrate]
+                            except Exception:
+                                pass
+                                
+                            cred_url = f"https://api.themoviedb.org/3/movie/{movie_id}/credits?api_key={TMDB_API_KEY}"
+                            try:
+                                cred_res = requests.get(cred_url, timeout=5).json()
+                                cast_array = cred_res.get('cast', [])
+                                source['cast'] = [actor['name'] for actor in cast_array[:5]]
+                            except Exception:
+                                pass
+                except Exception as e:
+                    import logging
+                    logging.warning(f"Failed to fetch TMDB data for {title}: {e}")
+                
+                return source
+
+            start_time = time.time()
+            if sources:
+                with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+                    sources = list(executor.map(enrich_single_source, sources))
+            end_time = time.time()
+            print(f"⏱️ TMDB Parallel Enrichment completed in {end_time - start_time:.2f} seconds")
+            
             response['sources'] = sources
         
         # Add to memory
@@ -958,7 +1228,7 @@ def test_rag_system():
     """Test the RAG system with sample queries"""
     
     print("\n" + "="*70)
-    print("TESTING NETFLIX GPT RAG SYSTEM")
+    print("TESTING Movie Recommender RAG SYSTEM")
     print("="*70 + "\n")
     
     # Initialize RAG system

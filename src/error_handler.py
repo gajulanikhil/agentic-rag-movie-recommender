@@ -264,16 +264,17 @@ class InputValidator:
             return False, "Filters must be a dictionary"
         
         # Validate filter keys
-        valid_keys = ['genre', 'year', 'director', 'type']
+        valid_keys = ['genre', 'year', 'director', 'type', 'min_year', 'max_year', 'min_rating', 'content_type', 'provider']
         for key in filters.keys():
             if key not in valid_keys:
                 return False, f"Invalid filter key: {key}. Valid keys: {valid_keys}"
         
-        # Validate year if present
-        if 'year' in filters:
-            year = filters['year']
-            if not isinstance(year, int) or year < 1900 or year > 2030:
-                return False, f"Invalid year: {year}. Must be between 1900-2030"
+        # Validate year boundaries if present
+        for yr_key in ['min_year', 'max_year', 'year']:
+            if yr_key in filters and filters[yr_key] is not None:
+                yr = filters[yr_key]
+                if not isinstance(yr, int) or yr < 1800 or yr > 2050:
+                    return False, f"Invalid year: {yr}. Must be between 1800-2050."
         
         return True, None
     

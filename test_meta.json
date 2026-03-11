@@ -1,0 +1,45 @@
+{
+  "response": "Hello and welcome! I'm thrilled to help you with some movie recommendations. I understand you're looking for movies on Netflix, and you'd like me to suggest some films that fit your criteria.\n\nFrom my database, I've curated a list of movies that match your request. Here are three recommendations:\n\n1. The Irishman (2019) - A crime drama that follows the life of Frank Sheeran, a hitman who claims to have been involved in the disappearance of Jimmy Hoffa.\n2. Roma (2018) - A black-and-white drama that tells the story of a live-in housekeeper for a middle-class family in 1970s Mexico City.\n3. The Two Popes (2019) - A biographical comedy-drama that explores the unlikely friendship between Pope Benedict XVI and Pope Francis.\n\nAll of these movies are currently streaming on Netflix and have received high ratings from critics and audiences alike. Enjoy your watch!\n\n**Sources:**\n\u2022 The Irishman (2019)\n\u2022 Roma (2018)\n\u2022 The Two Popes (2019)",
+  "error": null,
+  "sources": [
+    {
+      "title": "The Irishman",
+      "year": "2019",
+      "genres": [],
+      "similarity_score": 0.99,
+      "poster_path": "https://image.tmdb.org/t/p/w500/mbm8k3GFhXS0ROd9AD1gqYbIFbM.jpg",
+      "overview": "Pennsylvania, 1956. Frank Sheeran, a war veteran of Irish origin who works as a truck driver, accidentally meets mobster Russell Bufalino. Once Frank becomes his trusted man, Bufalino sends him to Chicago with the task of helping Jimmy Hoffa, a powerful union leader related to organized crime, with whom Frank will maintain a close friendship for nearly twenty years.",
+      "rating": 7.6,
+      "providers": [
+        "Netflix",
+        "Netflix Standard with Ads"
+      ]
+    },
+    {
+      "title": "Roma",
+      "year": "2018",
+      "genres": [],
+      "similarity_score": 0.99,
+      "poster_path": "https://image.tmdb.org/t/p/w500/dtIIyQyALk57ko5bjac7hi01YQ.jpg",
+      "overview": "In 1970s Mexico City, two domestic workers help a mother of four while her husband is away for an extended period of time.",
+      "rating": 7.6,
+      "providers": [
+        "Netflix",
+        "Netflix Standard with Ads"
+      ]
+    },
+    {
+      "title": "The Two Popes",
+      "year": "2019",
+      "genres": [],
+      "similarity_score": 0.99,
+      "poster_path": "https://image.tmdb.org/t/p/w500/4d4mTSfDIFIbUbMLUfaKodvxYXA.jpg",
+      "overview": "Frustrated with the direction of the church, Cardinal Bergoglio requests permission to retire in 2012 from Pope Benedict. Instead, facing scandal and self-doubt, the introspective Pope Benedict summons his harshest critic and future successor to Rome to reveal a secret that would shake the foundations of the Catholic Church.",
+      "rating": 7.5,
+      "providers": [
+        "Netflix",
+        "Netflix Standard with Ads"
+      ]
+    }
+  ]
+}

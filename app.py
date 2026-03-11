@@ -1,9 +1,9 @@
 #app.py
 """
-Netflix GPT - Premium Streamlit Interface
+Movie Recommender - Premium Streamlit Interface
 Production-ready UI with Netflix styling
 """
-
+from src.tmdb_integration import get_multiple_posters, get_movie_poster
 import streamlit as st
 from streamlit_lottie import st_lottie
 import requests
@@ -11,6 +11,9 @@ import json
 from datetime import datetime
 from pathlib import Path
 import sys
+import io
+import speech_recognition as sr
+from streamlit_mic_recorder import mic_recorder
 
 # Add src to path
 sys.path.append('src')
@@ -20,7 +23,7 @@ from error_handler import ErrorHandler
 
 # Page config MUST be first Streamlit command
 st.set_page_config(
-    page_title="Netflix GPT",
+    page_title="Movie Recommender",
     page_icon="🎬",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -30,392 +33,295 @@ st.set_page_config(
 # CUSTOM CSS - NETFLIX PREMIUM THEME
 # ============================================================================
 
-def inject_custom_css():
-    """Inject custom CSS for Netflix-style UI"""
-    st.markdown("""
+def inject_custom_css(theme="dark"):
+    """Inject custom CSS for Perplexity-style UI"""
+    # Perplexity Dark Theme Colors
+    bg_gradient = "#191A1A"
+    sidebar_bg = "#151617"
+    hero_color = "#E8E8E8"
+    text_main = "#E8E8E8"
+    text_muted = "#A0A0A0"
+    card_bg = "#202222"
+    btn_bg = "#FFFFFF"
+    btn_hover = "#F0F0F0"
+    chat_bg = "transparent"
+    user_msg = "transparent"
+    user_text = "#E8E8E8"
+    bot_msg = "transparent"
+    bot_text = "#E8E8E8"
+    border_color = "#303234"
+
+    st.markdown(f"""
     <style>
-    /* Import Netflix font */
-    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@300;400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
     
-    /* Global Styles */
-    * {
-        font-family: 'Roboto', sans-serif;
-    }
+    * {{
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }}
     
-    /* Main background */
-    .stApp {
-        background: linear-gradient(to bottom, #0B0B0B 0%, #141414 100%);
-    }
+    .stApp {{
+        background: {bg_gradient};
+    }}
     
-    /* Hide Streamlit branding */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
+    #MainMenu, footer, header {{visibility: hidden;}}
     
-    /* Hero Section */
-    .hero-title {
-        font-family: 'Bebas Neue', cursive;
-        font-size: 5rem;
-        color: #E50914;
+    .hero-title {{
+        font-size: 2.5rem;
+        color: {hero_color};
         text-align: center;
-        letter-spacing: 0.1em;
-        text-shadow: 0 0 20px rgba(229, 9, 20, 0.5),
-                     0 0 40px rgba(229, 9, 20, 0.3);
+        font-weight: 500;
         margin-bottom: 0;
-        animation: glow 2s ease-in-out infinite alternate;
-    }
+        letter-spacing: -0.02em;
+    }}
     
-    @keyframes glow {
-        from {
-            text-shadow: 0 0 10px rgba(229, 9, 20, 0.4),
-                         0 0 20px rgba(229, 9, 20, 0.3);
-        }
-        to {
-            text-shadow: 0 0 20px rgba(229, 9, 20, 0.6),
-                         0 0 40px rgba(229, 9, 20, 0.4),
-                         0 0 60px rgba(229, 9, 20, 0.2);
-        }
-    }
+    .hero-tagline {{
+        display: none; /* Hide tagline for minimalist look */
+    }}
     
-    .hero-tagline {
-        font-size: 1.3rem;
-        color: #B3B3B3;
-        text-align: center;
-        margin-top: 0.5rem;
-        margin-bottom: 2rem;
-        text-shadow: 0 0 10px rgba(179, 179, 179, 0.3);
-    }
+    .netflix-divider {{
+        display: none; /* Hide dividers for cleaner look */
+    }}
     
-    /* Divider */
-    .netflix-divider {
-        height: 2px;
-        background: linear-gradient(to right, 
-            transparent 0%, 
-            #E50914 50%, 
-            transparent 100%);
-        margin: 2rem 0;
-        box-shadow: 0 0 10px rgba(229, 9, 20, 0.5);
-    }
+    section[data-testid="stSidebar"] {{
+        background: {sidebar_bg} !important;
+        border-right: 1px solid {border_color};
+    }}
     
-    /* Sidebar Styling */
-    section[data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #1F1F1F 0%, #0B0B0B 100%);
-        border-right: 1px solid #E50914;
-        box-shadow: 5px 0 15px rgba(229, 9, 20, 0.2);
-    }
-    
-    section[data-testid="stSidebar"] > div {
-        padding: 2rem 1rem;
-    }
-    
-    /* Sidebar Title */
-    .sidebar-title {
-        color: #E50914;
-        font-size: 1.5rem;
-        font-weight: bold;
-        text-align: center;
-        margin-bottom: 1.5rem;
-        text-shadow: 0 0 10px rgba(229, 9, 20, 0.5);
-    }
-    
-    /* Filter Section Headers */
-    .filter-header {
-        color: #FFFFFF;
-        font-size: 1rem;
+    .sidebar-title {{
+        color: {text_main};
+        font-size: 1.2rem;
         font-weight: 600;
+        margin-bottom: 1rem;
+    }}
+    
+    .filter-header {{
+        color: {text_main} !important;
+        font-size: 0.9rem;
+        font-weight: 500;
         margin-top: 1rem;
         margin-bottom: 0.5rem;
-        padding-left: 0.5rem;
-        border-left: 3px solid #E50914;
-    }
+    }}
     
-    /* Streamlit widgets in sidebar */
-    section[data-testid="stSidebar"] .stSelectbox label,
-    section[data-testid="stSidebar"] .stMultiSelect label,
-    section[data-testid="stSidebar"] .stSlider label {
-        color: #B3B3B3 !important;
-        font-size: 0.9rem;
-    }
+    section[data-testid="stSidebar"] label, .streamlit-expanderHeader, p, div {{
+        color: {text_main} !important;
+    }}
     
-    /* Chat Container */
-    .chat-container {
-        background: rgba(31, 31, 31, 0.6);
-        border-radius: 15px;
-        padding: 1.5rem;
+    /* Hide the chat container border and background */
+    .chat-container {{
+        background: {chat_bg};
+        padding: 1rem 0;
         margin: 1rem 0;
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(229, 9, 20, 0.1);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        border: none;
         max-height: 500px;
         overflow-y: auto;
-    }
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }}
     
-    /* Custom Scrollbar */
-    .chat-container::-webkit-scrollbar {
-        width: 8px;
-    }
-    
-    .chat-container::-webkit-scrollbar-track {
-        background: rgba(11, 11, 11, 0.5);
+    .chat-container::-webkit-scrollbar {{
+        width: 6px;
+    }}
+    .chat-container::-webkit-scrollbar-track {{
+        background: transparent;
+    }}
+    .chat-container::-webkit-scrollbar-thumb {{
+        background: rgba(255, 255, 255, 0.1);
         border-radius: 10px;
-    }
+    }}
     
-    .chat-container::-webkit-scrollbar-thumb {
-        background: #E50914;
-        border-radius: 10px;
-    }
+    /* Messages layout */
+    .message-row-user {{ display: flex; justify-content: flex-end; width: 100%; }}
+    .message-row-assistant {{ display: flex; justify-content: flex-start; width: 100%; }}
     
-    .chat-container::-webkit-scrollbar-thumb:hover {
-        background: #B20710;
-    }
+    .user-message {{
+        background: #26282A;
+        color: {user_text} !important;
+        padding: 0.8rem 1.2rem;
+        border-radius: 20px;
+        max-width: 80%;
+        font-size: 1.05rem;
+        line-height: 1.5;
+        font-weight: 500;
+    }}
+    .user-message * {{ color: {user_text} !important; }}
     
-    /* Chat Messages */
-    .user-message {
-        background: linear-gradient(135deg, #E50914 0%, #B20710 100%);
-        color: white;
-        padding: 1rem 1.5rem;
-        border-radius: 20px 20px 5px 20px;
-        margin: 0.5rem 0;
-        margin-left: 20%;
-        box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
-        animation: slideInRight 0.3s ease-out;
-    }
-    
-    .assistant-message {
-        background: rgba(45, 45, 45, 0.8);
-        color: #E5E5E5;
-        padding: 1rem 1.5rem;
-        border-radius: 20px 20px 20px 5px;
-        margin: 0.5rem 0;
-        margin-right: 20%;
-        border-left: 3px solid #E50914;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-        animation: slideInLeft 0.3s ease-out;
-    }
-    
-    @keyframes slideInRight {
-        from {
-            opacity: 0;
-            transform: translateX(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    }
-    
-    @keyframes slideInLeft {
-        from {
-            opacity: 0;
-            transform: translateX(-30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    }
-    
-    /* Message metadata */
-    .message-time {
-        font-size: 0.7rem;
-        color: #808080;
-        margin-top: 0.3rem;
-    }
-    
-    /* Example Queries */
-    .example-query {
-        background: rgba(31, 31, 31, 0.8);
-        border: 1px solid rgba(229, 9, 20, 0.3);
-        border-radius: 25px;
-        padding: 0.6rem 1.2rem;
-        margin: 0.4rem;
-        display: inline-block;
-        color: #E5E5E5;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        font-size: 0.9rem;
-    }
-    
-    .example-query:hover {
-        background: linear-gradient(135deg, #E50914 0%, #B20710 100%);
-        border-color: #E50914;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(229, 9, 20, 0.4);
-    }
-    
-    /* Input Section */
-    .stTextInput > div > div > input {
-        background: rgba(31, 31, 31, 0.9) !important;
-        border: 2px solid rgba(229, 9, 20, 0.3) !important;
-        border-radius: 25px !important;
-        color: white !important;
-        padding: 1rem 1.5rem !important;
-        font-size: 1rem !important;
-        transition: all 0.3s ease !important;
-    }
-    
-    .stTextInput > div > div > input:focus {
-        border-color: #E50914 !important;
-        box-shadow: 0 0 20px rgba(229, 9, 20, 0.4) !important;
-    }
-    
-    /* Buttons */
-    .stButton > button {
-        background: linear-gradient(135deg, #E50914 0%, #B20710 100%);
-        color: white;
-        border: none;
-        border-radius: 25px;
-        padding: 0.7rem 2rem;
-        font-weight: 600;
+    .assistant-message {{
+        background: {bot_msg};
+        color: {bot_text} !important;
+        padding: 0.5rem 0;
+        max-width: 100%;
         font-size: 1rem;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
-        width: 100%;
-    }
+        line-height: 1.6;
+    }}
+    .assistant-message * {{ color: {bot_text} !important; }}
     
-    .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 25px rgba(229, 9, 20, 0.5);
-        background: linear-gradient(135deg, #F40612 0%, #C00813 100%);
-    }
+    .message-content {{ display: inline-block; width: 100%; }}
+    .message-time {{ display: none; }} /* Hide timestamps for cleaner look */
     
-    .stButton > button:active {
-        transform: translateY(0);
-    }
+    /* Input Search Bar */
+    .stTextInput > div > div > input {{
+        background: {card_bg} !important;
+        border: 1px solid {border_color} !important;
+        border-radius: 32px !important;
+        color: {text_main} !important;
+        padding: 0.8rem 1.5rem !important;
+        font-size: 1rem;
+    }}
+    .stTextInput > div > div > input:focus {{ 
+        border-color: #505050 !important; 
+        box-shadow: none !important; 
+    }}
     
-    /* Movie Card */
-    .movie-card {
-        background: rgba(31, 31, 31, 0.8);
-        border-radius: 10px;
+    /* Submit Button inside or near search */
+    .stButton > button {{
+        background: #FFFFFF;
+        color: #000000 !important;
+        border-radius: 50%;
+        border: none;
+        width: 36px !important;
+        height: 36px !important;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        transition: opacity 0.2s;
+        margin-left: auto;
+    }}
+    .stButton > button:hover {{ opacity: 0.8; color: #000000 !important; background: #FFFFFF; }}
+    
+    .stButton > button p {{
+        margin: 0;
+        font-size: 1.2rem;
+        line-height: 1;
+        color: #000000 !important;
+    }}
+    
+    /* Cards and specific elements */
+    .movie-card {{
+        background: {card_bg};
+        border-radius: 12px;
         padding: 1rem;
         margin: 0.5rem 0;
-        border-left: 4px solid #E50914;
-        transition: all 0.3s ease;
-    }
-    
-    .movie-card:hover {
-        background: rgba(45, 45, 45, 0.9);
-        transform: translateX(5px);
-        box-shadow: 0 5px 20px rgba(229, 9, 20, 0.2);
-    }
-    
-    .movie-title {
-        color: #FFFFFF;
-        font-size: 1.2rem;
-        font-weight: bold;
-        margin-bottom: 0.5rem;
-    }
-    
-    .movie-info {
-        color: #B3B3B3;
-        font-size: 0.9rem;
-        margin: 0.3rem 0;
-    }
-    
-    .movie-genre {
-        display: inline-block;
-        background: rgba(229, 9, 20, 0.2);
-        color: #E50914;
+        border: 1px solid {border_color};
+    }}
+    .movie-title {{ color: {text_main}; font-size: 1.1rem; font-weight: 600; margin-bottom: 0.25rem; }}
+    .movie-info {{ color: {text_muted}; font-size: 0.9rem; margin: 0.2rem 0; }}
+    .movie-genre {{
+        background: #303234;
+        color: {text_main};
         padding: 0.2rem 0.6rem;
         border-radius: 12px;
         font-size: 0.8rem;
         margin-right: 0.3rem;
-        margin-top: 0.3rem;
-    }
+        display: inline-block;
+        margin-top: 0.5rem;
+    }}
     
-    /* Loading Spinner */
-    .stSpinner > div {
-        border-top-color: #E50914 !important;
-    }
-    
-    /* Expander */
-    .streamlit-expanderHeader {
-        background: rgba(31, 31, 31, 0.8);
-        border-radius: 10px;
-        color: #E5E5E5 !important;
-        font-weight: 600;
-    }
-    
-    .streamlit-expanderHeader:hover {
-        background: rgba(45, 45, 45, 0.9);
-        border-left: 4px solid #E50914;
-    }
-    
-    /* Success/Error Messages */
-    .stSuccess {
-        background: rgba(0, 230, 118, 0.1) !important;
-        border-left: 4px solid #00E676 !important;
-        color: #00E676 !important;
-    }
-    
-    .stError {
-        background: rgba(229, 9, 20, 0.1) !important;
-        border-left: 4px solid #E50914 !important;
-        color: #FF6B6B !important;
-    }
-    
-    .stWarning {
-        background: rgba(255, 193, 7, 0.1) !important;
-        border-left: 4px solid #FFC107 !important;
-        color: #FFD54F !important;
-    }
-    
-    /* Info box */
-    .info-box {
-        background: rgba(31, 31, 31, 0.6);
-        border-left: 4px solid #E50914;
-        border-radius: 8px;
-        padding: 1rem;
-        margin: 1rem 0;
-        color: #B3B3B3;
-    }
-    
-    /* Stats boxes */
-    .stat-box {
-        background: linear-gradient(135deg, rgba(229, 9, 20, 0.1) 0%, rgba(31, 31, 31, 0.8) 100%);
-        border-radius: 10px;
+    .stat-box {{
+        background: {card_bg};
+        border-radius: 12px;
         padding: 1.5rem;
         text-align: center;
-        border: 1px solid rgba(229, 9, 20, 0.2);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    }
+        border: 1px solid {border_color};
+    }}
+    .stat-number {{ font-size: 2rem; color: {text_main}; font-weight: 600; }}
+    .stat-label {{ font-size: 0.9rem; color: {text_muted} !important; }}
+    .info-box {{ background: {card_bg}; border: 1px solid {border_color}; border-radius: 12px; padding: 1.5rem; color: {text_muted} !important; text-align: center; }}
     
-    .stat-number {
-        font-size: 2.5rem;
-        color: #E50914;
-        font-weight: bold;
-        text-shadow: 0 0 10px rgba(229, 9, 20, 0.5);
-    }
+    /* Override markdown p spacing */
+    .assistant-message p {{ margin-bottom: 0.75rem; }}
     
-    .stat-label {
-        font-size: 0.9rem;
-        color: #B3B3B3;
+    /* Input Container layout hack to make it look cohesive */
+    [data-testid="stForm"] {{
+        background: #202222;
+        border: 1px solid #303234;
+        border-radius: 16px;
+        padding: 0.5rem 1rem 1rem 1rem;
+        display: flex;
+        flex-direction: column;
+    }}
+    [data-testid="stForm"] .stTextInput > div > div > input {{
+        background: transparent !important;
+        border: none !important;
+        padding: 0.8rem 0rem 0.5rem 0rem !important;
+        font-size: 1.1rem;
+        font-weight: 400;
+    }}
+    [data-testid="stForm"] .stTextInput > div > div > input::placeholder {{
+        color: #808080;
+    }}
+    
+    .input-bottom-row {{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         margin-top: 0.5rem;
-    }
+    }}
     
-    /* Fade in animation */
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
+    .input-action-btn {{
+        background: transparent;
+        border: 1px solid #404040;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        color: #A0A0A0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        padding: 0;
+    }}
     
-    .fade-in {
-        animation: fadeIn 0.5s ease-out;
-    }
+    .input-tools {{
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        color: #A0A0A0;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }}
+    /* Form submit button alignment override */
+    [data-testid="stForm"] .stButton > button {{
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        z-index: 10;
+        margin: 0;
+        background: #FFFFFF;
+        color: #000000 !important;
+        border-radius: 50%;
+        border: none;
+        width: 36px !important;
+        height: 36px !important;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        transition: opacity 0.2s;
+    }}
+    
+    /* Mic button alignment override: moves the external mic element inside the form visually */
+    .external-mic {{
+        position: absolute;
+        bottom: 85px; /* Adjust depending on form height relative to page */
+        right: 80px;
+        z-index: 999;
+    }}
+    
+    /* Make the mic component button look clean */
+    .external-mic > div > button {{
+        background: transparent;
+        border: none;
+        color: #A0A0A0;
+        cursor: pointer;
+        padding: 5px;
+    }}
+    .external-mic > div > button:hover {{ color: #FFFFFF; background: transparent !important; }}
     </style>
     """, unsafe_allow_html=True)
-
-# ============================================================================
-# HELPER FUNCTIONS
-# ============================================================================
-
 def load_lottie_url(url: str):
     """Load Lottie animation from URL"""
     try:
@@ -442,17 +348,37 @@ def initialize_session_state():
     
     if 'current_input' not in st.session_state:
         st.session_state.current_input = ""
+    if 'theme' not in st.session_state:
+        st.session_state.theme = "dark"
+
+
+def transcribe_audio(audio_bytes):
+    """Transcribe audio bytes to text using SpeechRecognition and Google Web Speech API"""
+    recognizer = sr.Recognizer()
+    try:
+        # Convert bytes to an audio data source
+        with sr.AudioFile(io.BytesIO(audio_bytes)) as source:
+            audio_data = recognizer.record(source)
+            text = recognizer.recognize_google(audio_data)
+            return text
+    except sr.UnknownValueError:
+        st.error("Audio was unclear, could not understand.")
+        return ""
+    except Exception as e:
+        st.error(f"Error transcribing audio: {str(e)}")
+        return ""
 
 def initialize_rag_system():
     """Initialize the RAG system"""
     if not st.session_state.system_initialized:
         try:
-            with st.spinner("🎬 Initializing Netflix GPT..."):
+            with st.spinner("🎬 Initializing Movie Recommender..."):
                 session_id = datetime.now().strftime("%Y%m%d_%H%M%S")
                 st.session_state.rag_system = NetflixGPTRobust(
                     model_name="llama3.2",
                     temperature=0.7,
-                    max_memory_turns=5,
+                    max_memory_turns=3,
+                    top_k_retrieval=3,
                     session_id=f"streamlit_{session_id}",
                     enable_validation=True
                 )
@@ -475,19 +401,38 @@ def initialize_rag_system():
             return False
     
     return True
-
+def safe_get_posters(sources):
+    """Safely get posters with fallback"""
+    try:
+        return get_multiple_posters(sources)
+    except Exception as e:
+        print(f"TMDB Error: {e}")
+        # Return sources without posters
+        for source in sources:
+            source['poster_url'] = None
+            source['backdrop_url'] = None
+        return sources
+    
 def format_sources(sources):
-    """Format source movies as cards"""
+    """Format source movies as cards with posters"""
     if not sources:
         return ""
     
+    # Get posters for all sources
+    try:
+        sources_with_posters = get_multiple_posters(sources[:5])
+    except:
+        sources_with_posters = sources[:5]
+    
     html = '<div style="margin-top: 1rem;">'
     
-    for source in sources[:5]:  # Show top 5
+    for source in sources_with_posters:
         title = source.get('title', 'Unknown')
         year = source.get('year', 'N/A')
         genres = source.get('genres', [])
         score = source.get('similarity_score', 0)
+        poster_url = source.get('poster_url')
+        rating = source.get('vote_average')
         
         # Format genres
         if isinstance(genres, list):
@@ -495,13 +440,35 @@ def format_sources(sources):
         else:
             genre_tags = f'<span class="movie-genre">{genres}</span>'
         
-        html += f'''
-        <div class="movie-card">
-            <div class="movie-title">🎬 {title}</div>
-            <div class="movie-info">📅 {year} • Relevance: {score:.0%}</div>
-            <div style="margin-top: 0.5rem;">{genre_tags}</div>
-        </div>
-        '''
+        # Build card with poster
+        if poster_url:
+            html += f'''
+            <div class="movie-card" style="display: flex; gap: 1rem;">
+                <div style="flex-shrink: 0;">
+                    <img src="{poster_url}" 
+                         style="width: 100px; height: 150px; object-fit: cover; border-radius: 8px; 
+                                box-shadow: 0 4px 8px rgba(0,0,0,0.3);"
+                         alt="{title} poster">
+                </div>
+                <div style="flex-grow: 1;">
+                    <div class="movie-title">🎬 {title}</div>
+                    <div class="movie-info">📅 {year} • Relevance: {score:.0%}</div>
+                    {f'<div class="movie-info">⭐ {rating}/10</div>' if rating else ''}
+                    <div style="margin-top: 0.5rem;">{genre_tags}</div>
+                </div>
+            </div>
+            '''
+        else:
+            # Fallback without poster
+            html = ''
+            # html += f'''
+            # <div class="movie-card">
+            #     <div class="movie-title">🎬 {title}</div>
+            #     <div class="movie-info">📅 {year} • Relevance: {score:.0%}</div>
+            #     {f'<div class="movie-info">⭐ {rating}/10</div>' if rating else ''}
+            #     <div style="margin-top: 0.5rem;">{genre_tags}</div>
+            # </div>
+            # '''
     
     html += '</div>'
     return html
@@ -517,8 +484,12 @@ def set_example_query(query):
 def render_sidebar():
     """Render the sidebar with filters"""
     with st.sidebar:
-        st.markdown('<div class="sidebar-title">🎯 Advanced Filters</div>', unsafe_allow_html=True)
+        st.markdown('<div class="sidebar-title">⚙️ Settings</div>', unsafe_allow_html=True)
+        # Theme is permanently set to dark mode
+        st.session_state.theme = 'dark'
+        
         st.markdown('<div class="netflix-divider"></div>', unsafe_allow_html=True)
+        st.markdown('<div class="sidebar-title">🎯 Advanced Filters</div>', unsafe_allow_html=True)
         
         # Genre filter
         st.markdown('<div class="filter-header">Genre</div>', unsafe_allow_html=True)
@@ -557,14 +528,7 @@ def render_sidebar():
             label_visibility="collapsed"
         )
         
-        # Reset button
-        st.markdown('<div style="margin-top: 2rem;"></div>', unsafe_allow_html=True)
-        if st.button("🔄 Reset Filters", use_container_width=True):
-            st.session_state.genre_filter = []
-            st.session_state.year_filter = (1990, 2024)
-            st.session_state.rating_filter = 6.0
-            st.session_state.type_filter = "All"
-            st.rerun()
+        # Note: Reset Filters button removed per user request
         
         # System Status
         st.markdown('<div class="netflix-divider" style="margin-top: 2rem;"></div>', unsafe_allow_html=True)
@@ -628,50 +592,26 @@ def render_sidebar():
 def main():
     """Main application"""
     
-    # Inject CSS
-    inject_custom_css()
-    
-    # Initialize session state
+    # Initialize session state FIRST
     initialize_session_state()
     
     # Render sidebar and get filters
     filters = render_sidebar()
     
-    # Hero Section
-    st.markdown('<h1 class="hero-title">NETFLIX GPT</h1>', unsafe_allow_html=True)
-    st.markdown('<p class="hero-tagline">Your AI-powered movie discovery assistant 🎬</p>', unsafe_allow_html=True)
-    st.markdown('<div class="netflix-divider"></div>', unsafe_allow_html=True)
+    # Inject CSS based on theme
+    inject_custom_css(st.session_state.theme)
+    
+    # Hero Section - Perplexity Style Logo
+    st.markdown('<h1 class="hero-title" style="font-family: \'Satoshi\', sans-serif; letter-spacing: -0.05em;">AI Movie Recommender</h1>', unsafe_allow_html=True)
     
     # Initialize RAG system
     if not st.session_state.system_initialized:
         if not initialize_rag_system():
             st.stop()
     
-    # Example queries section
-    st.markdown('<div class="fade-in">', unsafe_allow_html=True)
-    st.markdown("### 💡 Try these examples:")
-    
-    example_queries = [
-        "Suggest psychological thrillers like Shutter Island",
-        "Best romantic movies from 2015 to 2020",
-        "Feel good comedy movies for weekend",
-        "Top rated crime TV shows",
-        "Movies similar to Inception"
-    ]
-    
-    # Create clickable example buttons
-    cols = st.columns(len(example_queries))
-    for idx, (col, query) in enumerate(zip(cols, example_queries)):
-        with col:
-            if st.button(f"💬 {query[:30]}...", key=f"example_{idx}", use_container_width=True):
-                set_example_query(query)
-                st.rerun()
-    
-    st.markdown('</div>', unsafe_allow_html=True)
-    st.markdown('<div class="netflix-divider"></div>', unsafe_allow_html=True)
+    # Example queries section removed
     
     # Chat container
-    st.markdown("### 💬 Conversation")
     
     chat_container = st.container()
     
@@ -679,60 +619,111 @@ def main():
         if st.session_state.chat_history:
             st.markdown('<div class="chat-container">', unsafe_allow_html=True)
             
+            from markdown_it import MarkdownIt
+            md = MarkdownIt()
+            
             for message in st.session_state.chat_history:
                 if message['role'] == 'user':
                     st.markdown(f'''
-                    <div class="user-message">
-                        {message['content']}
-                        <div class="message-time">{message.get('timestamp', '')}</div>
+                    <div class="message-row-user">
+                        <div class="user-message">
+                            <span class="message-content">{md.render(message['content'])}</span>
+                            <span class="message-time">{message.get('timestamp', 'Now')}</span>
+                        </div>
                     </div>
                     ''', unsafe_allow_html=True)
                 else:
+                    # Assistant message with enhanced display
                     st.markdown(f'''
-                    <div class="assistant-message">
-                        {message['content']}
-                        <div class="message-time">{message.get('timestamp', '')}</div>
+                    <div class="message-row-assistant">
+                        <div class="assistant-message">
+                            <span class="message-content">{md.render(message['content'])}</span>
+                            <span class="message-time">{message.get('timestamp', 'Now')}</span>
+                        </div>
                     </div>
                     ''', unsafe_allow_html=True)
                     
-                    # Show sources if available
+                    # Show sources with inline WhatsApp attachment style
                     if message.get('sources'):
-                        with st.expander("📚 View Sources"):
-                            st.markdown(format_sources(message['sources']), unsafe_allow_html=True)
+                        sources_with_posters = get_multiple_posters(message['sources'])
+                        
+                        # Use pure HTML flexbox instead of Streamlit columns so it dynamically wraps 1..N posters
+                        html_content = '<div style="margin-top: 10px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 15px;">'
+                        
+                        # Dynamically size width based on poster count to mimic an expanding wrap (min 120px max wide)
+                        width_css = "flex: 1 1 120px; max-width: 160px; min-width: 120px;" if len(sources_with_posters) > 1 else "max-width: 250px;"
+                        
+                        for source in sources_with_posters:
+                            if source.get('poster_url'):
+                                html_content += f'<div style="{width_css} background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.05);"><img src="{source["poster_url"]}" style="width: 100%; height: auto; display: block; object-fit: cover; aspect-ratio: 2/3;"><div style="padding: 8px;"><div style="font-size: 0.85rem; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #000000;">{source["title"]}</div><div style="font-size: 0.75rem; color: #667781;">{source.get("year", "")}</div></div></div>'
+                            else:
+                                html_content += f'<div style="{width_css} background: #ffffff; border-radius: 8px; padding: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.05); aspect-ratio: 2/3; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;"><div style="font-size: 2rem; margin-bottom: 5px;">🎬</div><div style="font-size: 0.85rem; font-weight: bold; color: #000000;">{source["title"]}</div><div style="font-size: 0.75rem; color: #667781;">{source.get("year", "")}</div></div>'
+                        
+                        html_content += '</div>'
+                        st.markdown(html_content, unsafe_allow_html=True)
             
-            st.markdown('</div>', unsafe_allow_html=True)
+            #st.markdown('</div>', unsafe_allow_html=True)
         else:
-            st.markdown('''
-            <div class="info-box">
-                <p>👋 Welcome to Netflix GPT! I'm here to help you discover amazing movies and shows.</p>
-                <p>💡 Ask me anything about movies - recommendations, comparisons, or specific genres!</p>
-            </div>
-            ''', unsafe_allow_html=True)
+            pass # Removed welcome message to match Perplexity's minimal UI
     
     # Input section
     st.markdown('<div class="netflix-divider"></div>', unsafe_allow_html=True)
     
-    col1, col2 = st.columns([5, 1])
+    audio_info = None
     
-    with col1:
+    # Place mic component first, but visually pull it down via CSS
+    st.markdown('<div class="external-mic">', unsafe_allow_html=True)
+    audio_info = mic_recorder(
+        start_prompt="🎙️",
+        stop_prompt="⏹️",
+        key='mic_recorder',
+        format="wav",
+        just_once=True,
+    )
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    if audio_info and 'bytes' in audio_info:
+        with st.spinner("Transcribing..."):
+            text = transcribe_audio(audio_info['bytes'])
+            if text:
+                st.session_state.current_input = text
+
+    with st.form("chat_form", clear_on_submit=False):
         user_input = st.text_input(
-            "Ask me anything about movies...",
+            "Ask anything...",
             value=st.session_state.current_input,
-            placeholder="E.g., Recommend action movies with great plots...",
+            placeholder="Ask anything...",
             key="user_query_input",
             label_visibility="collapsed"
         )
-    
-    with col2:
-        send_button = st.button("🚀 Send", use_container_width=True)
-    
+        
+        # Bottom row of the input field
+        st.markdown('''
+            <div class="input-bottom-row">
+                <div class="input-action-btn">+</div>
+                <div class="input-tools">
+                    <span style="display: flex; align-items: center; gap: 4px; cursor: pointer;">Model <span style="font-size: 0.7em;">▼</span></span>
+                    <span style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                        Computer
+                    </span>
+                    <!-- Spacers for absolute positioned CSS elements -->
+                    <span style="width: 40px; display: inline-block;"></span>
+                    <span style="width: 40px; display: inline-block;"></span>
+                </div>
+            </div>
+        ''', unsafe_allow_html=True)
+        
+        # We use an arrow icon representing the send action
+        send_button = st.form_submit_button("→", use_container_width=False)
+            
     # Process query
     if send_button and user_input:
         # Reset current input
         st.session_state.current_input = ""
         
         # Add user message
-        timestamp = datetime.now().strftime("%H:%M")
+        timestamp = datetime.now().strftime("%I:%M %p")
         st.session_state.chat_history.append({
             'role': 'user',
             'content': user_input,
@@ -781,12 +772,12 @@ def main():
     
     # Footer
     st.markdown('<div class="netflix-divider" style="margin-top: 3rem;"></div>', unsafe_allow_html=True)
-    st.markdown('''
-    <div style="text-align: center; color: #808080; padding: 2rem 0;">
-        <p>Built with Streamlit • Powered by Ollama & ChromaDB</p>
-        <p style="font-size: 0.8rem;">Netflix GPT © 2024 • Educational Project</p>
-    </div>
-    ''', unsafe_allow_html=True)
+    # st.markdown('''
+    # <div style="text-align: center; color: #808080; padding: 2rem 0;">
+    #     <p>Powered by Group 14 - The Peter Pan Posse</p>
+    #     <p style="font-size: 0.8rem;">Nikhil Gajula • Radhey Mutha • Muneeb Ahmed</p>
+    # </div>
+    # ''', unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
