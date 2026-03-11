@@ -153,6 +153,40 @@ Raw Data → Processing → Vector Store → Search → Concurrency → AI Gener
  (CSV)      Cleaning      (Local)     Sorting    (TMDB API)      (Local)
 ```
 
+### Detailed Notebook & Code Execution Flow
+
+#### 1. Data Ingestion & Exploration (`notebooks/01_data_exploration.ipynb` ➔ `src/data_ingestion.py`)
+- **`MovieDataProcessor.process_netflix_data()`:** Loads raw `netflix_titles.csv`, cleans whitespace, and splits strings via Pandas to extract genres and directors.
+- **`MovieDataProcessor.process_tmdb_data()`:** Loads TMDB movies & credits datasets (`tmdb_5000_movies.csv`), merges them, decodes interior JSON blocks, and drops low-voted entries (filtering for `vote_average` >= 6.0 and `vote_count` >= 500).
+- **`MovieDataProcessor.merge_datasets()`:** Harmonizes metadata structures and concats both DataFrames into memory, actively wiping duplicate title entries.
+- **`MovieDataProcessor.create_movie_documents()`:** Iterates over the merged DataFrame to write out individual, heavily-structured Markdown representations of the movies (`doc_text`), packing the associated raw metrics mapping into a nested `metadata` dictionary.
+
+#### 2. Vector Database Creation (`src/vectorstore.py`)
+- **`NetflixVectorStore.load_documents()`:** Pulls the JSON compilation created during the ingestion stage into Python `Document` structures.
+- **`NetflixVectorStore.setup_vectorstore()`:** Initializes the HuggingFace `all-MiniLM-L6-v2` transformer block and binds to local ChromaDB path `data/vectorstore`.
+- **`NetflixVectorStore.index_documents()`:** Utilizes a custom Langchain `RecursiveCharacterTextSplitter` to carve doc arrays into 800-character chunks with 100-character overlaps, encoding them directly to persistent Chromadb hashes inside the `netflix_gpt_movies` collection.
+
+#### 3. Backend API Setup (`main.py`)
+- **`app = FastAPI()`:** Spins up the ASGI ASGI web tier via Uvicorn.
+- **`recommender = NetflixGPTRobust()`:** Cold-boots the Langchain architecture upon server launch, linking ChromaDB, the ConversationBufferMemory, and Ollama (`llama3.2`).
+- **`chat_endpoint(request: ChatRequest)`:** Acts as the listener mapping requests from UI `POST /api/chat`, aggregating frontend UI variables (e.g., `mood`, `genre`, `min_year`) into a tightly formatted context dictionary.
+
+#### 4. The Recommendation Engine (`src/rag_chain.py`)
+- **`NetflixGPTRobust.query_with_memory()`:** Central dispatcher interpreting the incoming query from FastAPI.
+- **`vectorstore.similarity_search()`:** Issues semantic search against ChromaDB requesting the Top 5-15 matching embeddings.
+- **`_apply_post_retrieval_filters()`:** Applies non-negotiable metadata conditions (`genre`, `release_year`, etc.).
+- **`concurrent.futures.ThreadPoolExecutor.map(_enrich_source_with_tmdb)`:** Extremely fast background task that pings external live APIs. 
+    - Queries `https://api.themoviedb.org/3/search/movie` seeking specific `id`.
+    - Queries `/movie/{id}/watch/providers` identifying active streaming footprints (e.g. Netflix vs Hulu).
+    - Queries `/movie/{id}/credits` extracting the Top 5 Cast arrays.
+- **`qa_chain.invoke()`:** Collates the confirmed movie document strings, conversational memory trace, and the active query, submitting the entire package to `Ollama (Llama 3.2)` payload.
+- Returns normalized `response` and array of fully hydrated `sources` metadata JSON objects back out to FastAPI.
+
+#### 5. Frontend Render (`frontend/app/page.js`)
+- **`handleSend()`:** Serializes user text and Sidebar drop-downs into JSON and `fetch()` POSTs to FastAPI.
+- Renders Chat bubbles utilizing `ReactMarkdown` styling parsing Markdown code block outputs.
+- Traverses the `sources` array dropping customized TMDB UI cards featuring expandable "View Details" cast lists and dynamic streaming provider icons.
+
 ---
 
 ## 🚀 Getting Started
