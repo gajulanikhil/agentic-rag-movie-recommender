@@ -1,35 +1,11 @@
-# LLM and RAG Framework
-langchain==0.1.0
-langchain-community==0.0.13
-
-# Vector Database
-chromadb
-fastapi
-uvicorn
-python-multipart
-
-# Embeddings
-sentence-transformers==2.3.1
-
-# Data Processing
-pandas
-numpy
-matplotlib
-
-# PDF Processing (if needed for documents)
-pypdf2==3.0.1
-
-# UI Framework
-streamlit==1.30.0
-streamlit-lottie==0.0.5
-Pillow==10.1.0
+fastapi==0.110.0
+uvicorn==0.27.1
+pydantic==2.6.4
+python-dotenv==1.0.1
 requests==2.31.0
-
-# Utilities
-python-dotenv==1.0.0
-
-ipykernel
-
-# Voice Input Recognition
-streamlit-mic-recorder==0.0.8 
-SpeechRecognition==3.14.0
+langchain==0.1.13
+langchain-community==0.0.29
+chromadb==0.4.24
+sentence-transformers==2.5.1
+pandas==2.2.1
+numpy==1.26.4

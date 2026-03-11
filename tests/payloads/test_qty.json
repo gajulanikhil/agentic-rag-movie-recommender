@@ -1,0 +1,96 @@
+{
+  "response": "Hello Movie Lover!\n\nI'd be delighted to recommend some action-packed movies for you! Based on your request, I've taken a look at our conversation history and movie database context.\n\nYou've asked for the top 10 action movies, and I've curated a list of thrilling films that fit your criteria. Here are my top recommendations:\n\n1. Mad Max: Fury Road (2015) - An adrenaline-fueled post-apocalyptic adventure that showcases stunning stunts and breathtaking action sequences.\n2. The Dark Knight (2008) - An intense superhero thriller that pits Batman against the Joker in a battle for Gotham City's soul.\n3. Casino Royale (2006) - A gritty, high-stakes spy thriller that marks the beginning of Daniel Craig's iconic James Bond era.\n4. The Bourne Ultimatum (2007) - A heart-pumping action sequence-filled ride that follows Jason Bourne's quest for identity and revenge.\n5. Inception (2010) - A mind-bending sci-fi action film that delves into the world of dream-sharing and extraction.\n6. The Matrix (1999) - A groundbreaking, visually stunning classic that explores the nature of reality in a dystopian future.\n7. John Wick (2014) - A stylish, high-octane action film that follows a retired hitman's quest for revenge against a powerful crime lord.\n8. Atomic Blonde (2017) - A espionage thriller set in 1980s Berlin, featuring Charlize Theron's stunning performance as a top-level spy.\n9. Dunkirk (2017) - A visceral, immersive war drama that recreates the epic Battle of Dunkirk.\n10. Mission: Impossible - Fallout (2018) - A non-stop, high-stakes action ride that follows Ethan Hunt's mission to stop a catastrophic nuclear disaster.\n\n\u2022 Mad Max: Fury Road (2015) -\n\n**Sources:**\n\u2022 Mad Max: Fury Road (2015)\n\u2022 The Dark Knight (2008)\n\u2022 Casino Royale (2006)\n\u2022 The Bourne Ultimatum (2007)\n\u2022 Inception (2010)\n\u2022 The Matrix (1999)\n\u2022 John Wick (2014)\n\u2022 Atomic Blonde (2017)\n\u2022 Dunkirk (2017)\n\u2022 Mission: Impossible - Fallout (2018)",
+  "error": null,
+  "sources": [
+    {
+      "title": "Mad Max: Fury Road",
+      "year": "2015",
+      "genres": [],
+      "similarity_score": 0.99,
+      "poster_path": "https://image.tmdb.org/t/p/w500/hA2ple9q4qnwxp3hKVNhroipsir.jpg",
+      "overview": "An apocalyptic story set in the furthest reaches of our planet, in a stark desert landscape where humanity is broken, and most everyone is crazed fighting for the necessities of life. Within this world exist two rebels on the run who just might be able to restore order.",
+      "rating": 7.6
+    },
+    {
+      "title": "The Dark Knight",
+      "year": "2008",
+      "genres": [],
+      "similarity_score": 0.99,
+      "poster_path": "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
+      "overview": "Batman raises the stakes in his war on crime. With the help of Lt. Jim Gordon and District Attorney Harvey Dent, Batman sets out to dismantle the remaining criminal organizations that plague the streets. The partnership proves to be effective, but they soon find themselves prey to a reign of chaos unleashed by a rising criminal mastermind known to the terrified citizens of Gotham as the Joker.",
+      "rating": 8.5
+    },
+    {
+      "title": "Casino Royale",
+      "year": "2006",
+      "genres": [],
+      "similarity_score": 0.99,
+      "poster_path": "https://image.tmdb.org/t/p/w500/lMrxYKKhd4lqRzwUHAy5gcx9PSO.jpg",
+      "overview": "Le Chiffre, a banker to the world's terrorists, is scheduled to participate in a high-stakes poker game in Montenegro, where he intends to use his winnings to establish his financial grip on the terrorist market. M sends Bond\u2014on his maiden mission as a 00 Agent\u2014to attend this game and prevent Le Chiffre from winning. With the help of Vesper Lynd and Felix Leiter, Bond enters the most important poker game in his already dangerous career.",
+      "rating": 7.6
+    },
+    {
+      "title": "The Bourne Ultimatum",
+      "year": "2007",
+      "genres": [],
+      "similarity_score": 0.99,
+      "poster_path": "https://image.tmdb.org/t/p/w500/15rMz5MRXFp7CP4VxhjYw4y0FUn.jpg",
+      "overview": "Bourne is brought out of hiding once again by reporter Simon Ross who is trying to unveil Operation Blackbriar, an upgrade to Project Treadstone, in a series of newspaper columns. Information from the reporter stirs a new set of memories, and Bourne must finally uncover his dark past while dodging The Company's best efforts to eradicate him.",
+      "rating": 7.4
+    },
+    {
+      "title": "Inception",
+      "year": "2010",
+      "genres": [],
+      "similarity_score": 0.99,
+      "poster_path": "https://image.tmdb.org/t/p/w500/xlaY2zyzMfkhk0HSC5VUwzoZPU1.jpg",
+      "overview": "Cobb, a skilled thief who commits corporate espionage by infiltrating the subconscious of his targets is offered a chance to regain his old life as payment for a task considered to be impossible: \"inception\", the implantation of another person's idea into a target's subconscious.",
+      "rating": 8.4
+    },
+    {
+      "title": "The Matrix",
+      "year": "1999",
+      "genres": [],
+      "similarity_score": 0.99,
+      "poster_path": "https://image.tmdb.org/t/p/w500/p96dm7sCMn4VYAStA6siNz30G1r.jpg",
+      "overview": "Set in the 22nd century, The Matrix tells the story of a computer hacker who joins a group of underground insurgents fighting the vast and powerful computers who now rule the earth.",
+      "rating": 8.2
+    },
+    {
+      "title": "John Wick",
+      "year": "2014",
+      "genres": [],
+      "similarity_score": 0.99,
+      "poster_path": "https://image.tmdb.org/t/p/w500/wXqWR7dHncNRbxoEGybEy7QTe9h.jpg",
+      "overview": "Ex-hitman John Wick comes out of retirement to track down the gangsters that took everything from him.",
+      "rating": 7.5
+    },
+    {
+      "title": "Atomic Blonde",
+      "year": "2017",
+      "genres": [],
+      "similarity_score": 0.99,
+      "poster_path": "https://image.tmdb.org/t/p/w500/kV9R5h0Yct1kR8Hf8sJ1nX0Vz4x.jpg",
+      "overview": "An undercover MI6 agent is sent to Berlin during the Cold War to investigate the murder of a fellow agent and recover a missing list of double agents.",
+      "rating": 6.4
+    },
+    {
+      "title": "Dunkirk",
+      "year": "2017",
+      "genres": [],
+      "similarity_score": 0.99,
+      "poster_path": "https://image.tmdb.org/t/p/w500/b4Oe15CGLL61Ped0RAS9JpqdmCt.jpg",
+      "overview": "The story of the miraculous evacuation of Allied soldiers from Belgium, Britain, Canada and France, who were cut off and surrounded by the German army from the beaches and harbour of Dunkirk between May 26th and June 4th 1940 during World War II.",
+      "rating": 7.4
+    },
+    {
+      "title": "Mission: Impossible - Fallout",
+      "year": "2018",
+      "genres": [],
+      "similarity_score": 0.99,
+      "poster_path": "https://image.tmdb.org/t/p/w500/AkJQpZp9WoNdj7pLYSj1L0RcMMN.jpg",
+      "overview": "When an IMF mission ends badly, the world is faced with dire consequences. As Ethan Hunt takes it upon himself to fulfill his original briefing, the CIA begin to question his loyalty and his motives. The IMF team find themselves in a race against time, hunted by assassins while trying to prevent a global catastrophe.",
+      "rating": 7.4
+    }
+  ]
+}
