@@ -198,7 +198,7 @@ Raw Data → Processing → Vector Store → Search → Concurrency → AI Gener
 *The Next.js Glassmorphic chat interface. Features include an interactive sidebar for metadata filtering (Genre, Year, Minimum Rating, Platform) and an intuitive chat window ready for custom text or voice commands via the microphone icon.*
 
 ### 2. Live TMDB Movie Cards
-![Movie Recommendation Cards](docs/images/image.png)
+![Movie Recommendation Cards](docs/images/movie_card.png)
 *To prevent screen clutter on broad queries (e
 )
 *When the AI recommends a movie, the frontend parses the JSON `sources` payload to dynamically render rich UI cards. These feature high-res TMDB posters, active streaming platform icons, and click-to-expand Top Cast lists.*
