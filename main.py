@@ -38,6 +38,7 @@ class ChatRequest(BaseModel):
     max_year: int = 2024
     min_rating: float = 0.0
     content_type: str = "All"
+    provider: str = "All"
 
 from typing import List, Dict, Any, Optional
 
@@ -57,13 +58,23 @@ def chat_endpoint(request: ChatRequest):
         if request.mood:
             augmented_prompt = f"[{request.mood} mood] " + augmented_prompt
             
-        settings_info = f"\n[Filters: Genre={request.genre}, Year {request.min_year}-{request.max_year}, Rating > {request.min_rating}, Type={request.content_type}]"
+        settings_info = f"\n[Filters: Genre={request.genre}, Year {request.min_year}-{request.max_year}, Rating > {request.min_rating}, Type={request.content_type}, Streaming On={request.provider}]"
         
         # Combine them
         full_query = augmented_prompt + settings_info
         
+        # Compile pure metadata dict
+        filters_dict = {
+            "genre": request.genre,
+            "min_year": request.min_year,
+            "max_year": request.max_year,
+            "min_rating": request.min_rating,
+            "content_type": request.content_type,
+            "provider": request.provider
+        }
+        
         # Get response from the RAG chain safely
-        result = recommender.query_safe(full_query)
+        result = recommender.query_safe(full_query, filters=filters_dict)
         
         answer = result.get('answer', 'Sorry, I failed to generate a response.')
         

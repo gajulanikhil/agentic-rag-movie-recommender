@@ -9,7 +9,25 @@ export default function Home() {
   const [mood, setMood] = useState("");
   const [loading, setLoading] = useState(false);
   const [messages, setMessages] = useState([]);
+  const [expandedCards, setExpandedCards] = useState({});
   const messagesEndRef = useRef(null);
+  const abortControllerRef = useRef(null);
+
+  const formatTime = (date) => {
+    return date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    }).replace(' ', '');
+  };
+
+  const toggleCard = (msgIdx, srcIdx) => {
+    const key = `${msgIdx}-${srcIdx}`;
+    setExpandedCards(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -38,6 +56,7 @@ export default function Home() {
   const [minYear, setMinYear] = useState(1950);
   const [minRating, setMinRating] = useState(0.0);
   const [contentType, setContentType] = useState("All");
+  const [provider, setProvider] = useState("All");
 
   const moods = [
     { emoji: "🤩", label: "Fun", color: "#f39c12" },
@@ -99,17 +118,34 @@ export default function Home() {
     }
   };
 
+  const handleMoodClick = (m) => {
+    if (mood === m.label) {
+      setMood("");
+      setPrompt("");
+    } else {
+      setMood(m.label);
+      if (m.label === 'Surprise Me') {
+        setPrompt("I'm looking for a movie, surprise me!");
+      } else {
+        setPrompt(`I'm looking for a ${m.label.toLowerCase()} movie`);
+      }
+    }
+  };
+
   const handleSend = async () => {
     if (!prompt.trim()) return;
     const currentPrompt = prompt;
     setPrompt(""); // clear early to feel responsive
-    setMessages(prev => [...prev, { type: 'user', content: currentPrompt }]);
+    setMessages(prev => [...prev, { type: 'user', content: currentPrompt, timestamp: formatTime(new Date()) }]);
 
     setLoading(true);
+    abortControllerRef.current = new AbortController();
+
     try {
       const res = await fetch("http://localhost:8000/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: abortControllerRef.current.signal,
         body: JSON.stringify({
           prompt: currentPrompt,
           mood,
@@ -117,15 +153,44 @@ export default function Home() {
           min_year: minYear,
           max_year: 2024,
           min_rating: minRating,
-          content_type: contentType
+          content_type: contentType,
+          provider: provider
         })
       });
       const data = await res.json();
-      setMessages(prev => [...prev, { type: 'ai', content: data.response, sources: data.sources || [] }]);
+      setMessages(prev => [...prev, { type: 'ai', content: data.response, sources: data.sources || [], timestamp: formatTime(new Date()) }]);
     } catch (err) {
-      setMessages(prev => [...prev, { type: 'ai', content: "Error communicating with AI server." }]);
+      if (err.name === 'AbortError') {
+        console.log('Request cancelled');
+        return;
+      }
+      setMessages(prev => [...prev, { type: 'ai', content: "Error communicating with AI server.", timestamp: formatTime(new Date()) }]);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleCancel = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    setMessages(prev => {
+      const lastMsg = prev[prev.length - 1];
+      if (lastMsg && lastMsg.type === 'user') {
+        setPrompt(lastMsg.content); // Restore prompt
+        return prev.slice(0, -1);   // Remove from chat
+      }
+      return prev;
+    });
     setLoading(false);
+  };
+
+  const handleResetFilters = () => {
+    setGenre("All");
+    setMinYear(1950);
+    setMinRating(0.0);
+    setContentType("All");
+    setProvider("All");
   };
 
   return (
@@ -182,24 +247,28 @@ export default function Home() {
           </select>
         </div>
 
-        <button className={styles.resetBtn}>RESET Filters</button>
+        <div className={styles.filterGroup}>
+          <label className={styles.filterLabel}>Streaming Platform</label>
+          <select className={styles.selectBox} value={provider} onChange={(e) => setProvider(e.target.value)}>
+            <option>All</option>
+            <option>Netflix</option>
+            <option>Amazon Prime Video</option>
+            <option>Hulu</option>
+            <option>Disney+</option>
+            <option>Apple TV Plus</option>
+            <option>Max</option>
+            <option>Paramount+</option>
+            <option>Peacock</option>
+          </select>
+        </div>
+        <button className={styles.resetBtn} onClick={handleResetFilters}>RESET Filters</button>
       </aside>
 
       {/* Main Content */}
       <main className={styles.main}>
         {/* Header */}
         <header className={`${styles.header} glass-panel`}>
-          <div className={styles.iconGroup}>
-            <div className={styles.iconBtn}>🎙️</div>
-            <div className={styles.iconBtn}>🔍</div>
-            <div className={styles.iconBtn}>↗️</div>
-          </div>
           <h1 className={styles.title}>AI Movie Recommender</h1>
-          <div className={styles.iconGroup}>
-            <div className={styles.iconBtn}>💡</div>
-            <div className={styles.iconBtn}>🏦</div>
-            <div className={styles.iconBtn}>📝</div>
-          </div>
         </header>
 
         {/* Chat Region */}
@@ -228,7 +297,7 @@ export default function Home() {
                     key={m.label}
                     className={styles.moodBtn}
                     style={{ borderColor: mood === m.label ? m.color : 'var(--glass-border)', boxShadow: mood === m.label ? `0 0 10px ${m.color}` : 'none' }}
-                    onClick={() => setMood(m.label)}
+                    onClick={() => handleMoodClick(m)}
                   >
                     {m.emoji} {m.label}
                   </button>
@@ -241,43 +310,76 @@ export default function Home() {
               {messages.map((msg, idx) => (
                 <div key={idx} className={msg.type === 'user' ? styles.userMessage : styles.aiMessage}>
                   {msg.type === 'user' ? (
-                    <div className={styles.userBubble}>{msg.content}</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+                      <div className={styles.userBubble}>{msg.content}</div>
+                      {msg.timestamp && <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{msg.timestamp}</span>}
+                    </div>
                   ) : (
-                    <div className={styles.aiBubble}>
-                      <div className={styles.markdownContent}>
-                        <ReactMarkdown>{msg.content}</ReactMarkdown>
-                      </div>
-
-                      {/* Dynamic Recommended Movie Cards */}
-                      {msg.sources && msg.sources.length > 0 && (
-                        <div className={styles.resultsArea} style={{ marginTop: '20px' }}>
-                          <h3 style={{ color: 'var(--text-muted)' }}>Source Material</h3>
-                          <div className={styles.moviesCarousel}>
-                            {msg.sources.map((src, sIdx) => (
-                              <div key={sIdx} className={styles.movieCard}>
-                                <img
-                                  src={src.poster_path || "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&q=80&w=220&h=300"}
-                                  alt={src.title}
-                                  style={{ borderRadius: '8px', height: '180px', objectFit: 'cover' }}
-                                  onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&q=80&w=220&h=300"; }}
-                                />
-                                <h3 className={styles.movieTitle}>{src.title}</h3>
-                                <div className={styles.movieMeta}>
-                                  <span>{src.year || "N/A"}</span>
-                                  {src.rating && (
-                                    <span className={styles.movieRating}>★ {src.rating}</span>
-                                  )}
-                                  <span style={{ background: '#ffcc00', color: 'black', padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 'bold' }}>TMDB</span>
-                                </div>
-                                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '5px 0', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
-                                  {src.overview || src.description || "A recommended movie based on your prompt."}
-                                </p>
-                                <button className={styles.playBtn}>▶ View Details <span>+</span></button>
-                              </div>
-                            ))}
-                          </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px', maxWidth: '85%' }}>
+                      <div className={styles.aiBubble}>
+                        <div className={styles.markdownContent}>
+                          <ReactMarkdown>{msg.content}</ReactMarkdown>
                         </div>
-                      )}
+
+                        {/* Dynamic Recommended Movie Cards */}
+                        {msg.sources && msg.sources.length > 0 && (
+                          <div className={styles.resultsArea} style={{ marginTop: '20px' }}>
+                            <h3 style={{ color: 'var(--text-muted)' }}>Source Material</h3>
+                            <div className={styles.moviesCarousel}>
+                              {msg.sources.map((src, sIdx) => (
+                                <div key={sIdx} className={styles.movieCard}>
+                                  <img
+                                    src={src.poster_path || "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&q=80&w=220&h=300"}
+                                    alt={src.title}
+                                    style={{ borderRadius: '8px', height: '180px', objectFit: 'cover' }}
+                                    onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&q=80&w=220&h=300"; }}
+                                  />
+                                  <h3 className={styles.movieTitle}>{src.title}</h3>
+                                  <div className={styles.movieMeta}>
+                                    <span>{src.year || "N/A"}</span>
+                                    {src.rating && (
+                                      <span className={styles.movieRating}>★ {src.rating}</span>
+                                    )}
+                                    <span style={{ background: '#ffcc00', color: 'black', padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 'bold' }}>TMDB</span>
+                                  </div>
+                                  {src.providers && src.providers.length > 0 && (
+                                    <div style={{ marginTop: '0.25rem', fontSize: '0.8rem', color: '#1db954', fontWeight: 'bold' }}>
+                                      📺 {src.providers.join(', ')}
+                                    </div>
+                                  )}
+                                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '5px 0', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                                    {src.overview || src.description || "A recommended movie based on your prompt."}
+                                  </p>
+
+                                  {/* Expandable Cast Details */}
+                                  <div style={{ marginTop: 'auto', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '10px' }}>
+                                    <button
+                                      className={styles.playBtn}
+                                      onClick={() => toggleCard(idx, sIdx)}
+                                      style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'transparent', border: 'none', color: 'var(--neon-blue)', cursor: 'pointer', padding: '5px 0' }}
+                                    >
+                                      <span>▶ View Details</span>
+                                      <span style={{ transform: expandedCards[`${idx}-${sIdx}`] ? 'rotate(45deg)' : 'none', transition: 'transform 0.2s' }}>+</span>
+                                    </button>
+
+                                    {expandedCards[`${idx}-${sIdx}`] && src.cast && src.cast.length > 0 && (
+                                      <div style={{ marginTop: '10px', padding: '10px', background: 'rgba(0,0,0,0.3)', borderRadius: '6px', fontSize: '0.8rem', animation: 'fadeIn 0.3s ease' }}>
+                                        <div style={{ color: 'var(--text-muted)', marginBottom: '5px', fontWeight: 'bold' }}>Top Cast</div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                          {src.cast.map((actor, aIdx) => (
+                                            <div key={aIdx} style={{ color: '#fff' }}>• {actor}</div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      {msg.timestamp && <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '10px' }}>{msg.timestamp}</span>}
                     </div>
                   )}
                 </div>
@@ -285,12 +387,30 @@ export default function Home() {
 
               {/* Loading Indicator */}
               {loading && (
-                <div className={styles.aiMessage}>
-                  <div className={styles.aiBubble} style={{ display: 'inline-block', width: 'auto', animation: 'pulse 1.5s infinite', border: '1px solid var(--neon-purple)' }}>
+                <div className={styles.aiMessage} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div className={styles.aiBubble} style={{ display: 'inline-block', width: 'auto', animation: 'pulse 1.5s infinite', border: '1px solid var(--neon-purple)', margin: 0 }}>
                     <span style={{ fontSize: '1.2rem', color: 'var(--neon-blue)', fontWeight: 'bold' }}>
                       ✨ {loadingMessages[loadingMessageIndex]}
                     </span>
                   </div>
+                  <button
+                    onClick={handleCancel}
+                    style={{
+                      background: 'rgba(255, 50, 50, 0.2)',
+                      border: '1px solid rgba(255, 50, 50, 0.5)',
+                      color: '#ff6b6b',
+                      padding: '8px 16px',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      fontWeight: 'bold',
+                      transition: 'all 0.2s ease',
+                      fontSize: '0.9rem'
+                    }}
+                    onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(255, 50, 50, 0.4)'; e.currentTarget.style.borderColor = '#ff4757'; }}
+                    onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(255, 50, 50, 0.2)'; e.currentTarget.style.borderColor = 'rgba(255, 50, 50, 0.5)'; }}
+                  >
+                    ✕ Cancel
+                  </button>
                 </div>
               )}
 
@@ -299,7 +419,7 @@ export default function Home() {
             </div>
 
             {/* Input Bar */}
-            <div className={`${styles.inputContainer} ${isListening ? styles.listeningActive : ''}`}>
+            < div className={`${styles.inputContainer} ${isListening ? styles.listeningActive : ''}`}>
               <button
                 className={styles.micBtn}
                 onClick={toggleListening}
